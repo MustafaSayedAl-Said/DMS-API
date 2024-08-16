@@ -1,11 +1,11 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace DocumentManagementSystem.Dto
+﻿namespace DocumentManagementSystem.Dto
 {
     public class WorkspaceDto
     {
-        public int WorkspaceId { get; set; }
+        public int id { get; set; }
 
         public string Name { get; set; }
+
+        public int UserId { get; set; }
     }
 }

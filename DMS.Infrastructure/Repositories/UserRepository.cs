@@ -1,18 +1,21 @@
 ﻿using DMS.Core.Entities;
 using DMS.Core.Interfaces;
 using DMS.Infrastructure.Data;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 
 namespace DMS.Infrastructure.Repositories
 {
     public class UserRepository : GenericRepository<User>, IUserRepository
     {
+        private readonly DataContext _context;
         public UserRepository(DataContext context) : base(context)
         {
+            _context = context;
+        }
+
+        public bool userExists(int id)
+        {
+            return _context.Users.Any(u => u.Id == id);
         }
     }
 }

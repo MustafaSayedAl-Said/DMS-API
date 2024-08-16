@@ -1,5 +1,3 @@
-using Microsoft.EntityFrameworkCore;
-using System.Text.Json.Serialization;
 using DMS.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);

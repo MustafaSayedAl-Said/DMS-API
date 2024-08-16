@@ -1,12 +1,8 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace DocumentManagementSystem.Dto
+﻿namespace DocumentManagementSystem.Dto
 {
     public class MyDirectoryDto
     {
-
-        public int DirectoryId { get; set; }
-
+        public int id { get; set; }
         public string Name { get; set; }
     }
 }

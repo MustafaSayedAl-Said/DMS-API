@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Linq.Expressions;
 
 namespace DMS.Core.Interfaces
 {
@@ -13,7 +8,7 @@ namespace DMS.Core.Interfaces
 
         IEnumerable<T> GetAll();
 
-        Task<IEnumerable<T>> GetAllAsync(params Expression<Func<T, object>> [] includes);
+        Task<IEnumerable<T>> GetAllAsync(params Expression<Func<T, object>>[] includes);
 
         Task<T> GetByIdAsync(int id, params Expression<Func<T, object>>[] includes);
 
@@ -21,7 +16,7 @@ namespace DMS.Core.Interfaces
 
         Task AddAsync(T entity);
 
-        Task UpdateAsync(T id, T entity);
+        Task UpdateAsync(T entity);
 
         Task DeleteAsync(int id);
     }

@@ -1,12 +1,8 @@
-﻿using DMS.Core.Interfaces;
+﻿using DMS.Core.Entities;
+using DMS.Core.Interfaces;
 using DMS.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DMS.Infrastructure.Repositories
 {
@@ -55,21 +51,18 @@ namespace DMS.Infrastructure.Repositories
         {
             IQueryable<T> query = _context.Set<T>().AsQueryable();
 
-            foreach(var item in includes)
+            foreach (var item in includes)
             {
                 query = query.Include(item);
             }
-            return await ((DbSet <T>) query).FindAsync(id);
+            return await ((DbSet<T>)query).FindAsync(id);
         }
 
-        public async Task UpdateAsync(T id, T entity)
+        public async Task UpdateAsync(T entity)
         {
-            var currEntity = await _context.Set<T>().FindAsync(id);
+            _context.Set<T>().Update(entity);
+            await _context.SaveChangesAsync();
 
-            if (currEntity != null) {
-                _context.Update(currEntity);
-                await _context.SaveChangesAsync();
-            }
         }
     }
 }
