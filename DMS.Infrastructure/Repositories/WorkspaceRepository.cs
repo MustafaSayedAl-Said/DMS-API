@@ -1,6 +1,7 @@
 ﻿using DMS.Core.Entities;
 using DMS.Core.Interfaces;
 using DMS.Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace DMS.Infrastructure.Repositories
 {
@@ -17,6 +18,11 @@ namespace DMS.Infrastructure.Repositories
             var workspace = _context.Workspaces.Find(id);
             var userId = workspace.UserId;
             return userId;
+        }
+
+        public async Task<Workspace> getWorkspaceByUserId(int userId)
+        {
+            return await _context.Workspaces.AsNoTracking().FirstOrDefaultAsync(w => w.UserId == userId);
         }
 
         public bool workspaceExists(int id)

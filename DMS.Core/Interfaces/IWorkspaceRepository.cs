@@ -8,5 +8,6 @@ namespace DMS.Core.Interfaces
 
         public int getUserId(int id);
 
+        public Task<Workspace> getWorkspaceByUserId(int userId);
     }
 }

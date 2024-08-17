@@ -45,6 +45,24 @@ namespace DMS.API.Controllers
             return BadRequest($"This id [{id}] was Not Found");
         }
 
+        [HttpGet("user/{userId}")]
+
+        public async Task<IActionResult> GetByUser(int userId)
+        {
+            if (_uOW.userRepository.userExists(userId))
+            {
+                var workspace = await _uOW.workspaceRepository.getWorkspaceByUserId(userId);
+                var workspaceDto = _mapper.Map<WorkspaceDto>(workspace);
+                if (workspace is not null)
+                {
+                    return Ok(workspaceDto);
+                }
+
+                return BadRequest("Something went wrong");
+            }
+            return BadRequest($"This User id [{userId}] was Not Found");
+        }
+
         [HttpPost]
         public async Task<ActionResult> Post(WorkspaceDto workspaceDto)
         {
