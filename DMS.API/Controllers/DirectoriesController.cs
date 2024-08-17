@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace DMS.API.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/directories")]
     [ApiController]
     public class DirectoriesController : ControllerBase
     {
@@ -20,7 +20,7 @@ namespace DMS.API.Controllers
             _mapper = mapper;
         }
 
-        [HttpGet("get-all-directories")]
+        [HttpGet]
 
         public async Task<IActionResult> Get()
         {
@@ -33,7 +33,7 @@ namespace DMS.API.Controllers
             return BadRequest();
         }
 
-        [HttpGet("get-directory-by-id/{id}")]
+        [HttpGet("{id}")]
         
         public async Task<IActionResult> Get(int id)
         {
@@ -46,7 +46,7 @@ namespace DMS.API.Controllers
             return BadRequest($"This id [{id}] was Not Found");
         }
 
-        [HttpGet("get-directories-in-workspace")]
+        [HttpGet("workspace/{workspaceId}")]
 
         public async Task<IActionResult> DirectoriesInWorkspace(int workspaceId)
         {
@@ -63,7 +63,7 @@ namespace DMS.API.Controllers
             return BadRequest("Workspace doesn't exist");
         }
 
-        [HttpPost("add-new-directory")]
+        [HttpPost]
 
         public async Task<ActionResult> Post(MyDirectoryDto directoryDto)
         {
@@ -88,7 +88,7 @@ namespace DMS.API.Controllers
             }
         }
 
-        [HttpPut("update-existing-directory")]
+        [HttpPut]
 
         public async Task<ActionResult> Put(MyDirectoryDto directoryDto)
         {
@@ -114,7 +114,7 @@ namespace DMS.API.Controllers
             }
         }
 
-        [HttpDelete("delete-directory-by-id/{id}")]
+        [HttpDelete("{id}")]
 
         public async Task<ActionResult> Delete(int id)
         {

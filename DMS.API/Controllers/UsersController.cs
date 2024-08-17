@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace DMS.API.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/users")]
     [ApiController]
     public class UsersController : ControllerBase
     {
@@ -19,7 +19,7 @@ namespace DMS.API.Controllers
             _mapper = mapper;
         }
 
-        [HttpGet("get-all-users")]
+        [HttpGet]
 
         public async Task<IActionResult> Get()
         {
@@ -33,7 +33,7 @@ namespace DMS.API.Controllers
             return BadRequest("Not Found");
         }
 
-        [HttpGet("get-user-by-id/{id}")]
+        [HttpGet("{id}")]
 
         public async Task<IActionResult> Get(int id)
         {
@@ -46,7 +46,7 @@ namespace DMS.API.Controllers
             return BadRequest($"This id [{id}] was Not Found");
         }
 
-        [HttpPost("add-new-user")]
+        [HttpPost]
 
         public async Task<ActionResult> Post(UserDto userDto, string WorkspaceName)
         {
@@ -74,7 +74,7 @@ namespace DMS.API.Controllers
             }
         }
 
-        [HttpPut("update-existing-user")]
+        [HttpPut]
 
         public async Task<ActionResult> Put(UserDto userDto)
         {
@@ -100,7 +100,7 @@ namespace DMS.API.Controllers
             }
         }
 
-        [HttpDelete("delete-user-by-id/{id}")]
+        [HttpDelete("{id}")]
 
         public async Task<ActionResult> Delete(int id)
         {

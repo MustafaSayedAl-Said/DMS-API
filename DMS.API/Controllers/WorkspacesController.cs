@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace DMS.API.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/workspaces")]
     [ApiController]
     public class WorkspacesController : ControllerBase
     {
@@ -18,7 +18,7 @@ namespace DMS.API.Controllers
             _mapper = mapper;
         }
 
-        [HttpGet("get-all-workspaces")]
+        [HttpGet]
 
         public async Task<IActionResult> Get()
         {
@@ -31,7 +31,7 @@ namespace DMS.API.Controllers
             return BadRequest("Not Found");
         }
 
-        [HttpGet("get-workspace-by-id/{id}")]
+        [HttpGet("{id}")]
 
         public async Task<IActionResult> Get(int id)
         {
@@ -45,7 +45,7 @@ namespace DMS.API.Controllers
             return BadRequest($"This id [{id}] was Not Found");
         }
 
-        [HttpPost("add-new-workspace")]
+        [HttpPost]
         public async Task<ActionResult> Post(WorkspaceDto workspaceDto)
         {
             try
@@ -67,7 +67,7 @@ namespace DMS.API.Controllers
 
         }
 
-        [HttpPut("update-existing-workspace")]
+        [HttpPut]
 
         public async Task<ActionResult> Put(WorkspaceDto workspaceDto)
         {
@@ -94,7 +94,7 @@ namespace DMS.API.Controllers
 
         }
 
-        [HttpDelete("delete-workspace-by-id/{id}")]
+        [HttpDelete("{id}")]
 
         public async Task<ActionResult> Delete(int id)
         {

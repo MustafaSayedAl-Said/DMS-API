@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace DMS.API.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/documents")]
     [ApiController]
     public class DocumentsController : ControllerBase
     {
@@ -20,7 +20,7 @@ namespace DMS.API.Controllers
             _mapper = mapper;
         }
 
-        [HttpGet("get-all-documents")]
+        [HttpGet]
 
         public async Task<IActionResult> Get()
         {
@@ -35,7 +35,7 @@ namespace DMS.API.Controllers
             return BadRequest();
         }
 
-        [HttpGet("get-document-by-id/{id}")]
+        [HttpGet("{id}")]
 
         public async Task<IActionResult> Get(int id)
         {
@@ -48,7 +48,7 @@ namespace DMS.API.Controllers
             return BadRequest($"This id [{id}] was Not Found");
         }
 
-        [HttpGet("get-documents-in-directory")]
+        [HttpGet("directory/{directoryId}")]
 
         public async Task<IActionResult> DocumentsInDirectory(int directoryId)
         {
@@ -65,7 +65,7 @@ namespace DMS.API.Controllers
             return BadRequest("Directory doesn't exist");
         }
 
-        [HttpPost("add-new-document")]
+        [HttpPost]
 
         public async Task<ActionResult> Post(DocumentDto documentDto)
         {
@@ -90,7 +90,7 @@ namespace DMS.API.Controllers
             }
         }
 
-        [HttpPut("update-existing-document")]
+        [HttpPut]
 
         public async Task<ActionResult> Put(DocumentDto documentDto)
         {
@@ -116,7 +116,7 @@ namespace DMS.API.Controllers
             }
         }
 
-        [HttpDelete("delete-document-by-id/{id}")]
+        [HttpDelete("{id}")]
 
         public async Task<ActionResult> Delete(int id)
         {
