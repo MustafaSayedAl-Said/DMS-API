@@ -9,6 +9,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DMS.Infrastructure", "DMS.I
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DMS.API", "DMS.API\DMS.API.csproj", "{E9A92AC5-EA34-4503-8FAE-C83BDC892022}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{D72B19D8-ED61-447A-9022-28E1E8EE0189}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,6 +32,11 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{85171196-E144-417B-871E-75D9FF400CE6} = {D72B19D8-ED61-447A-9022-28E1E8EE0189}
+		{DE87F5DF-B51F-42D3-B2F3-6104BD501C2F} = {D72B19D8-ED61-447A-9022-28E1E8EE0189}
+		{E9A92AC5-EA34-4503-8FAE-C83BDC892022} = {D72B19D8-ED61-447A-9022-28E1E8EE0189}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {1AD9E61F-A7C8-4634-9E42-B708B18016B9}
