@@ -9,12 +9,12 @@ namespace DMS.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class DirectoryController : ControllerBase
+    public class DirectoriesController : ControllerBase
     {
         private readonly IUnitOfWork _uOW;
         private readonly IMapper _mapper;
 
-        public DirectoryController(IUnitOfWork UOW, IMapper mapper) 
+        public DirectoriesController(IUnitOfWork UOW, IMapper mapper) 
         {
             _uOW = UOW;
             _mapper = mapper;

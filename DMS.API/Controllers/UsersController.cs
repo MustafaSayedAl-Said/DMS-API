@@ -8,12 +8,12 @@ namespace DMS.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class UserController : ControllerBase
+    public class UsersController : ControllerBase
     {
         private readonly IUnitOfWork _uOW;
         private readonly IMapper _mapper;
 
-        public UserController(IUnitOfWork UOW, IMapper mapper)
+        public UsersController(IUnitOfWork UOW, IMapper mapper)
         {
             _uOW = UOW;
             _mapper = mapper;
