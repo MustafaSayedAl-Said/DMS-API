@@ -88,9 +88,9 @@ namespace DMS.API.Controllers
             }
         }
 
-        [HttpPut("{id}")]
+        [HttpPut]
 
-        public async Task<ActionResult> Put([FromForm] DocumentDto documentDto, int id)
+        public async Task<ActionResult> Put([FromForm] DocumentDto documentDto)
         {
             try
             {
@@ -98,13 +98,12 @@ namespace DMS.API.Controllers
                     return BadRequest(ModelState);
                 if (ModelState.IsValid)
                 {
-                    if (_uOW.documentRepository.documentExists(id))
+                    if (_uOW.documentRepository.documentExists(documentDto.Id))
                     {
-                        var documentMap = _mapper.Map<Document>(documentDto);
-                        await _uOW.documentRepository.UpdateAsync(documentMap);
-                        return Ok(documentDto);
+                        var res = await _uOW.documentRepository.UpdateAsync(documentDto);
+                        return res? Ok(documentDto) : BadRequest("Something went wrong");
                     }
-                    return BadRequest($"Document Not Found, Id [{id}] is Incorrect");
+                    return BadRequest($"Document Not Found, Id [{documentDto.Id}] is Incorrect");
                 }
                 return BadRequest(ModelState);
             }

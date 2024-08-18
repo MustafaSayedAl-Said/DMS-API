@@ -3,22 +3,18 @@ using DMS.Core.Dto;
 using DMS.Core.Entities;
 using DMS.Core.Interfaces;
 using DMS.Infrastructure.Data;
-using DMS.Infrastructure.Data.Migrations;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.FileProviders;
 
 namespace DMS.Infrastructure.Repositories
 {
     public class DocumentRepository : GenericRepository<Document>, IDocumentRepository
     {
         private readonly DataContext _context;
-        private readonly IFileProvider _fileProvider;
         private readonly IMapper _mapper;
 
-        public DocumentRepository(DataContext context, IFileProvider fileProvider, IMapper mapper) : base(context)
+        public DocumentRepository(DataContext context, IMapper mapper) : base(context)
         {
             _context = context;
-            _fileProvider = fileProvider;
             _mapper = mapper;
         }
 
@@ -26,31 +22,34 @@ namespace DMS.Infrastructure.Repositories
         {
             if (dto.DocumentContent is not null)
             {
-                var root = "/documents";
-                var documentName = $"{Guid.NewGuid()}" + dto.DocumentContent.FileName;
-                if (!Directory.Exists("wwwroot" + root))
-                {
-                    Directory.CreateDirectory("wwwroot" + root);
-                }
-                var src = root + documentName;
-                var docInfo = _fileProvider.GetFileInfo(src);
-                var rootPath = docInfo.PhysicalPath;
+                var root = "/documents/";
+                var documentName = $"{Guid.NewGuid()}{Path.GetExtension(dto.DocumentContent.FileName)}";
+                var directoryPath = Path.Combine("wwwroot", root.TrimStart('/'));
 
-                using (var fileStream = new FileStream(rootPath, FileMode.Create))
+                if (!Directory.Exists(directoryPath))
+                {
+                    Directory.CreateDirectory(directoryPath);
+                }
+
+                var src = Path.Combine(root, documentName);
+                var fullFilePath = Path.Combine(directoryPath, documentName);
+
+                using (var fileStream = new FileStream(fullFilePath, FileMode.Create))
                 {
                     await dto.DocumentContent.CopyToAsync(fileStream);
                 }
 
-                //Create New Document
+                // Map and save the document
                 var documentMap = _mapper.Map<Document>(dto);
                 documentMap.Name = dto.DocumentContent.FileName;
-                documentMap.DocumentContent = src;
+                documentMap.DocumentContent = src; // Relative path, as stored in the database
                 await _context.Documents.AddAsync(documentMap);
                 await _context.SaveChangesAsync();
                 return true;
             }
             return false;
         }
+
 
         public bool documentExists(int id)
         {
@@ -62,6 +61,38 @@ namespace DMS.Infrastructure.Repositories
             var documents = await _context.Documents.AsNoTracking().Where(d => d.DirectoryId == directoryId).ToListAsync();
 
             return documents;
+        }
+
+        public async Task<bool> UpdateAsync(DocumentDto dto)
+        {
+            if (dto.DocumentContent is not null)
+            {
+                var root = "/documents/";
+                var documentName = $"{Guid.NewGuid()}{Path.GetExtension(dto.DocumentContent.FileName)}";
+                var directoryPath = Path.Combine("wwwroot", root.TrimStart('/'));
+
+                if (!Directory.Exists(directoryPath))
+                {
+                    Directory.CreateDirectory(directoryPath);
+                }
+
+                var src = Path.Combine(root, documentName);
+                var fullFilePath = Path.Combine(directoryPath, documentName);
+
+                using (var fileStream = new FileStream(fullFilePath, FileMode.Create))
+                {
+                    await dto.DocumentContent.CopyToAsync(fileStream);
+                }
+
+                // Map and save the document
+                var documentMap = _mapper.Map<Document>(dto);
+                documentMap.Name = dto.DocumentContent.FileName;
+                documentMap.DocumentContent = src; // Relative path, as stored in the database
+                _context.Documents.Update(documentMap);
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            return false;
         }
     }
 }

@@ -9,7 +9,6 @@ namespace DMS.Infrastructure.Repositories
     {
         private readonly DataContext _context;
         private readonly IMapper _mapper;
-        private readonly IFileProvider _fileProvider;
 
 
         public IWorkspaceRepository workspaceRepository { get; }
@@ -20,15 +19,14 @@ namespace DMS.Infrastructure.Repositories
 
         public IDocumentRepository documentRepository { get; }
 
-        public UnitOfWork(DataContext context, IFileProvider fileProvider, IMapper mapper)
+        public UnitOfWork(DataContext context, IMapper mapper)
         {
             _context = context;
             _mapper = mapper;
-            _fileProvider = fileProvider;
             workspaceRepository = new WorkspaceRepository(_context);
             directoryRepository = new DirectoryRepository(_context);
             userRepository = new UserRepository(_context);
-            documentRepository = new DocumentRepository(_context, _fileProvider, _mapper);
+            documentRepository = new DocumentRepository(_context, _mapper);
         }
     }
 }

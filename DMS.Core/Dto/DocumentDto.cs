@@ -6,6 +6,7 @@ namespace DMS.Core.Dto
 {
     public class DocumentDto
     {
+        public int Id { get; set; }
 
         [Required]
         [ForeignKey("MyDirectory")]
