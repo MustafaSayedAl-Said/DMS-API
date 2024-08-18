@@ -1,8 +1,7 @@
 ﻿using AutoMapper;
+using DMS.Core.Dto;
 using DMS.Core.Entities;
 using DMS.Core.Interfaces;
-using DocumentManagementSystem.Dto;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DMS.API.Controllers
@@ -25,9 +24,9 @@ namespace DMS.API.Controllers
         public async Task<IActionResult> Get()
         {
             var allDocuments = await _uOW.documentRepository.GetAllAsync();
-            var documents = _mapper.Map<List<DocumentDto>>(allDocuments);
+            var documents = _mapper.Map<List<DocumentGetDto>>(allDocuments);
 
-            if(documents is not null)
+            if (documents is not null)
             {
                 return Ok(documents);
             }
@@ -40,8 +39,8 @@ namespace DMS.API.Controllers
         public async Task<IActionResult> Get(int id)
         {
             var document = await _uOW.documentRepository.GetAsync(id);
-            var documentDto = _mapper.Map<DocumentDto>(document);
-            if(documentDto is not null)
+            var documentDto = _mapper.Map<DocumentGetDto>(document);
+            if (documentDto is not null)
             {
                 return Ok(documentDto);
             }
@@ -55,7 +54,7 @@ namespace DMS.API.Controllers
             if (_uOW.directoryRepository.directoryExists(directoryId))
             {
                 var documents = await _uOW.documentRepository.GetDocumentsInDirectory(directoryId);
-                var documentsMap = _mapper.Map<List<DocumentDto>>(documents);
+                var documentsMap = _mapper.Map<List<DocumentGetDto>>(documents);
                 if (documentsMap is not null)
                 {
                     return Ok(documentsMap);
@@ -67,7 +66,7 @@ namespace DMS.API.Controllers
 
         [HttpPost]
 
-        public async Task<ActionResult> Post(DocumentDto documentDto)
+        public async Task<ActionResult> Post([FromForm] DocumentDto documentDto)
         {
             try
             {
@@ -75,9 +74,8 @@ namespace DMS.API.Controllers
                 {
                     if (_uOW.directoryRepository.directoryExists(documentDto.DirectoryId))
                     {
-                        var documentMap = _mapper.Map<Document>(documentDto);
-                        await _uOW.documentRepository.AddAsync(documentMap);
-                        return Ok(documentDto);
+                        var res = await _uOW.documentRepository.AddSync(documentDto);
+                        return res ? Ok(documentDto) : BadRequest("Something went wrong");
                     }
                     return NotFound("Directory Was Not Found");
                 }
@@ -90,9 +88,9 @@ namespace DMS.API.Controllers
             }
         }
 
-        [HttpPut]
+        [HttpPut("{id}")]
 
-        public async Task<ActionResult> Put(DocumentDto documentDto)
+        public async Task<ActionResult> Put([FromForm] DocumentDto documentDto, int id)
         {
             try
             {
@@ -100,13 +98,13 @@ namespace DMS.API.Controllers
                     return BadRequest(ModelState);
                 if (ModelState.IsValid)
                 {
-                    if (_uOW.documentRepository.documentExists(documentDto.id))
+                    if (_uOW.documentRepository.documentExists(id))
                     {
                         var documentMap = _mapper.Map<Document>(documentDto);
                         await _uOW.documentRepository.UpdateAsync(documentMap);
                         return Ok(documentDto);
                     }
-                    return BadRequest($"Document Not Found, Id [{documentDto.id}] is Incorrect");
+                    return BadRequest($"Document Not Found, Id [{id}] is Incorrect");
                 }
                 return BadRequest(ModelState);
             }

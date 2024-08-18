@@ -1,4 +1,4 @@
-﻿namespace DocumentManagementSystem.Dto
+﻿namespace DMS.Core.Dto
 {
     public class WorkspaceDto
     {

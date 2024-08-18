@@ -1,7 +1,6 @@
 ﻿using DMS.Core.Entities;
 using DMS.Core.Interfaces;
 using DMS.Infrastructure.Data;
-using Microsoft.EntityFrameworkCore;
 
 namespace DMS.Infrastructure.Repositories
 {

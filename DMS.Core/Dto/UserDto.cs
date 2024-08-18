@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace DocumentManagementSystem.Dto
+namespace DMS.Core.Dto
 {
     public class UserDto
     {

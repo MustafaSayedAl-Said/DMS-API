@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
+using DMS.Core.Dto;
 using DMS.Core.Entities;
 using DMS.Core.Interfaces;
-using DocumentManagementSystem.Dto;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DMS.API.Controllers
@@ -26,7 +26,7 @@ namespace DMS.API.Controllers
             var allUsers = await _uOW.userRepository.GetAllAsync();
             var users = _mapper.Map<List<UserDto>>(allUsers);
 
-            if(allUsers is not null)
+            if (allUsers is not null)
             {
                 return Ok(users);
             }
@@ -39,7 +39,7 @@ namespace DMS.API.Controllers
         {
             var user = await _uOW.userRepository.GetAsync(id);
             var userDto = _mapper.Map<UserDto>(user);
-            if(userDto is not null)
+            if (userDto is not null)
             {
                 return Ok(userDto);
             }

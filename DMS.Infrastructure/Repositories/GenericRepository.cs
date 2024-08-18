@@ -1,5 +1,4 @@
-﻿using DMS.Core.Entities;
-using DMS.Core.Interfaces;
+﻿using DMS.Core.Interfaces;
 using DMS.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;

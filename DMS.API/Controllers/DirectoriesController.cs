@@ -1,8 +1,7 @@
 ﻿using AutoMapper;
+using DMS.Core.Dto;
 using DMS.Core.Entities;
 using DMS.Core.Interfaces;
-using DocumentManagementSystem.Dto;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DMS.API.Controllers
@@ -14,7 +13,7 @@ namespace DMS.API.Controllers
         private readonly IUnitOfWork _uOW;
         private readonly IMapper _mapper;
 
-        public DirectoriesController(IUnitOfWork UOW, IMapper mapper) 
+        public DirectoriesController(IUnitOfWork UOW, IMapper mapper)
         {
             _uOW = UOW;
             _mapper = mapper;
@@ -34,7 +33,7 @@ namespace DMS.API.Controllers
         }
 
         [HttpGet("{id}")]
-        
+
         public async Task<IActionResult> Get(int id)
         {
             var directory = await _uOW.directoryRepository.GetAsync(id);
@@ -108,7 +107,7 @@ namespace DMS.API.Controllers
                 }
                 return BadRequest(ModelState);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return BadRequest(ex.Message);
             }

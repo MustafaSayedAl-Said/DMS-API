@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
+using DMS.Core.Dto;
 using DMS.Core.Entities;
 using DMS.Core.Interfaces;
-using DocumentManagementSystem.Dto;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DMS.API.Controllers

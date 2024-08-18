@@ -12,6 +12,8 @@ namespace DMS.Core.Entities
         [ForeignKey("MyDirectory")]
         public int DirectoryId { get; set; }
 
+        public string DocumentContent { get; set; }
+
         public virtual MyDirectory MyDirectory { get; set; }
     }
 }
