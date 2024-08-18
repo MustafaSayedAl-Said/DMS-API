@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using DMS.API.Errors;
 using DMS.Core.Dto;
 using DMS.Core.Entities;
 using DMS.Core.Interfaces;
@@ -19,7 +20,8 @@ namespace DMS.API.Controllers
         }
 
         [HttpGet]
-
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(BaseCommonResponse), StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Get()
         {
             var allWorkspaces = await _uOW.workspaceRepository.GetAllAsync();
@@ -28,10 +30,13 @@ namespace DMS.API.Controllers
             {
                 return Ok(workspaces);
             }
-            return BadRequest("Not Found");
+            return NotFound(new BaseCommonResponse(404));
         }
 
         [HttpGet("{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(BaseCommonResponse), StatusCodes.Status404NotFound)]
+
 
         public async Task<IActionResult> Get(int id)
         {
@@ -42,7 +47,7 @@ namespace DMS.API.Controllers
                 return Ok(workspaceDto);
             }
 
-            return BadRequest($"This id [{id}] was Not Found");
+            return NotFound(new BaseCommonResponse(404));
         }
 
         [HttpGet("user/{userId}")]
@@ -58,9 +63,9 @@ namespace DMS.API.Controllers
                     return Ok(workspaceDto);
                 }
 
-                return BadRequest("Something went wrong");
+                return BadRequest(new BaseCommonResponse(500));
             }
-            return BadRequest($"This User id [{userId}] was Not Found");
+            return NotFound(new BaseCommonResponse(404)); ;
         }
 
         [HttpPost]
