@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using DMS.Core.Interfaces;
 using DMS.Infrastructure.Data;
-using Microsoft.Extensions.FileProviders;
 
 namespace DMS.Infrastructure.Repositories
 {

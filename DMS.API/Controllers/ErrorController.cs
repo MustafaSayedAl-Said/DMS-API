@@ -1,5 +1,4 @@
 ﻿using DMS.API.Errors;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DMS.API.Controllers

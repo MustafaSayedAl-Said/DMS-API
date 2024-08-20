@@ -16,7 +16,7 @@ namespace DMS.API.Helper
         {
             if (!string.IsNullOrEmpty(source.DocumentContent))
             {
-                return _config["ApiURL"]  + source.DocumentContent;
+                return _config["ApiURL"] + source.DocumentContent;
             }
             return null;
         }

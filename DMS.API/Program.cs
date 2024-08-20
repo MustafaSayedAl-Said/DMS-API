@@ -1,9 +1,6 @@
-using DMS.API.Errors;
 using DMS.API.Extensions;
 using DMS.API.Middleware;
 using DMS.Infrastructure;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.FileProviders;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,6 +12,7 @@ builder.Services.AddApiRegistration();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.InfrastructureConfiguration(builder.Configuration);
+
 
 
 
@@ -32,6 +30,10 @@ app.UseStatusCodePagesWithReExecute("/errors/{0}");
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
+
+
+// Enable CORS for the specified policy
+app.UseCors("AllowAngularApp");
 
 app.UseAuthorization();
 

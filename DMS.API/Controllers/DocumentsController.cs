@@ -1,8 +1,9 @@
 ﻿using AutoMapper;
+using DMS.Core.Sharing;
 using DMS.Core.Dto;
-using DMS.Core.Entities;
 using DMS.Core.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using DMS.API.Helper;
 
 namespace DMS.API.Controllers
 {
@@ -21,14 +22,15 @@ namespace DMS.API.Controllers
 
         [HttpGet]
 
-        public async Task<IActionResult> Get()
+        public async Task<IActionResult> Get([FromQuery]DocumentParams documentParams)
         {
-            var allDocuments = await _uOW.documentRepository.GetAllAsync();
-            var documents = _mapper.Map<List<DocumentGetDto>>(allDocuments);
+            var allDocuments = await _uOW.documentRepository.GetAllAsync(documentParams);
+            var documents = _mapper.Map<IReadOnlyList<DocumentGetDto>>(allDocuments);
+            var totalItems = documents.Count;
 
             if (documents is not null)
             {
-                return Ok(documents);
+                return Ok(new Pagination<DocumentGetDto>(totalItems, documentParams.PageSize, documentParams.PageNumber, documents));
             }
 
             return BadRequest();
@@ -101,7 +103,7 @@ namespace DMS.API.Controllers
                     if (_uOW.documentRepository.documentExists(documentDto.Id))
                     {
                         var res = await _uOW.documentRepository.UpdateAsync(documentDto);
-                        return res? Ok(documentDto) : BadRequest("Something went wrong");
+                        return res ? Ok(documentDto) : BadRequest("Something went wrong");
                     }
                     return BadRequest($"Document Not Found, Id [{documentDto.Id}] is Incorrect");
                 }

@@ -26,6 +26,19 @@ namespace DMS.API.Extensions
                     return new BadRequestObjectResult(errorResponse);
                 };
             });
+
+            //Enable Cors
+            // Configure CORS to allow requests from http://localhost:4200
+            services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAngularApp", builder =>
+                {
+                    builder.WithOrigins("http://localhost:4200")
+                           .AllowAnyHeader()
+                           .AllowAnyMethod()
+                           .AllowCredentials();
+                });
+            });
             return services;
         }
     }

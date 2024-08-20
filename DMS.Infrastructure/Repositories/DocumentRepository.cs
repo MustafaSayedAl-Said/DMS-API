@@ -2,6 +2,7 @@
 using DMS.Core.Dto;
 using DMS.Core.Entities;
 using DMS.Core.Interfaces;
+using DMS.Core.Sharing;
 using DMS.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
@@ -50,6 +51,40 @@ namespace DMS.Infrastructure.Repositories
             return false;
         }
 
+        public async Task<IEnumerable<Document>> GetAllAsync(DocumentParams documentParams)
+        {
+            List<Document> query;
+
+            //search by directoryId
+            if (documentParams.DirectoryId.HasValue)
+            {
+                query = await _context.Documents.AsNoTracking().Where(d => d.DirectoryId == documentParams.DirectoryId).ToListAsync();
+            }
+            else
+            {
+                query = await _context.Documents.AsNoTracking().ToListAsync();
+            }
+
+            //search by name
+            if(!string.IsNullOrEmpty(documentParams.Search))
+                query = query.Where(x => x.Name.ToLower().Contains(documentParams.Search.ToLower())).ToList();
+
+            //sorting
+            if (!string.IsNullOrEmpty(documentParams.Sort))
+            {
+                query = documentParams.Sort switch
+                {
+                    "NameAsc" => query.OrderBy(x => x.Name).ToList(),
+                    "NameDesc" => query.OrderByDescending(x => x.Name).ToList(),
+                    _ => query.OrderBy(x => x.Name).ToList(),
+                };
+            }
+
+            //paging
+            query = query.Skip((documentParams.PageSize) * (documentParams.PageNumber - 1)).Take(documentParams.PageSize).ToList();
+
+            return query;
+        }
 
         public bool documentExists(int id)
         {
