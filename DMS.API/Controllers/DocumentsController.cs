@@ -49,22 +49,22 @@ namespace DMS.API.Controllers
             return BadRequest($"This id [{id}] was Not Found");
         }
 
-        [HttpGet("directory/{directoryId}")]
+        //[HttpGet("directory/{directoryId}")]
 
-        public async Task<IActionResult> DocumentsInDirectory(int directoryId)
-        {
-            if (_uOW.directoryRepository.directoryExists(directoryId))
-            {
-                var documents = await _uOW.documentRepository.GetDocumentsInDirectory(directoryId);
-                var documentsMap = _mapper.Map<List<DocumentGetDto>>(documents);
-                if (documentsMap is not null)
-                {
-                    return Ok(documentsMap);
-                }
-                return BadRequest("Something went wrong");
-            }
-            return BadRequest("Directory doesn't exist");
-        }
+        //public async Task<IActionResult> DocumentsInDirectory(int directoryId)
+        //{
+        //    if (_uOW.directoryRepository.directoryExists(directoryId))
+        //    {
+        //        var documents = await _uOW.documentRepository.GetDocumentsInDirectory(directoryId);
+        //        var documentsMap = _mapper.Map<List<DocumentGetDto>>(documents);
+        //        if (documentsMap is not null)
+        //        {
+        //            return Ok(documentsMap);
+        //        }
+        //        return BadRequest("Something went wrong");
+        //    }
+        //    return BadRequest("Directory doesn't exist");
+        //}
 
         [HttpPost]
 

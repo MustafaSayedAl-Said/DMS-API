@@ -1,8 +1,13 @@
-﻿namespace DMS.Core.Sharing
-{
-    public class DocumentParams
-    {
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
+namespace DMS.Core.Sharing
+{
+    public class DirectoryParams
+    {
         public int MaxPageSize { get; set; } = 15;
 
         private int _pageSize = 5;
@@ -15,7 +20,7 @@
 
         public string Sort { get; set; }
 
-        public int? DirectoryId { get; set; }
+        public int? WorkspaceId { get; set; }
 
         public int PageNumber { get; set; } = 1;
 

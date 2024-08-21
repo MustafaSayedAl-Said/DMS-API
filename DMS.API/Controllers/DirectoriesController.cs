@@ -1,7 +1,9 @@
 ﻿using AutoMapper;
+using DMS.API.Helper;
 using DMS.Core.Dto;
 using DMS.Core.Entities;
 using DMS.Core.Interfaces;
+using DMS.Core.Sharing;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DMS.API.Controllers
@@ -21,13 +23,14 @@ namespace DMS.API.Controllers
 
         [HttpGet]
 
-        public async Task<IActionResult> Get()
+        public async Task<IActionResult> Get([FromQuery]DirectoryParams directoryParams)
         {
-            var allDirectories = await _uOW.directoryRepository.GetAllAsync();
+            var allDirectories = await _uOW.directoryRepository.GetAllAsync(directoryParams);
             var directories = _mapper.Map<List<MyDirectoryDto>>(allDirectories);
+            var totalItems = directories.Count;
             if (directories is not null)
             {
-                return Ok(directories);
+                return Ok(new Pagination<MyDirectoryDto>(totalItems, directoryParams.PageSize, directoryParams.PageNumber, directories));
             }
             return BadRequest();
         }
@@ -45,22 +48,22 @@ namespace DMS.API.Controllers
             return BadRequest($"This id [{id}] was Not Found");
         }
 
-        [HttpGet("workspace/{workspaceId}")]
+        //[HttpGet("workspace/{workspaceId}")]
 
-        public async Task<IActionResult> DirectoriesInWorkspace(int workspaceId)
-        {
-            if (_uOW.workspaceRepository.workspaceExists(workspaceId))
-            {
-                var directories = await _uOW.directoryRepository.GetDirectoriesInWorkspace(workspaceId);
-                var directoriesMap = _mapper.Map<List<MyDirectoryDto>>(directories);
-                if (directoriesMap is not null)
-                {
-                    return Ok(directoriesMap);
-                }
-                return BadRequest("Something went wrong");
-            }
-            return BadRequest("Workspace doesn't exist");
-        }
+        //public async Task<IActionResult> DirectoriesInWorkspace(int workspaceId)
+        //{
+        //    if (_uOW.workspaceRepository.workspaceExists(workspaceId))
+        //    {
+        //        var directories = await _uOW.directoryRepository.GetDirectoriesInWorkspace(workspaceId);
+        //        var directoriesMap = _mapper.Map<List<MyDirectoryDto>>(directories);
+        //        if (directoriesMap is not null)
+        //        {
+        //            return Ok(directoriesMap);
+        //        }
+        //        return BadRequest("Something went wrong");
+        //    }
+        //    return BadRequest("Workspace doesn't exist");
+        //}
 
         [HttpPost]
 

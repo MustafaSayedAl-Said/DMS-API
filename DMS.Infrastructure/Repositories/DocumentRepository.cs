@@ -91,12 +91,12 @@ namespace DMS.Infrastructure.Repositories
             return _context.Documents.Any(d => d.Id == id);
         }
 
-        public async Task<ICollection<Document>> GetDocumentsInDirectory(int directoryId)
-        {
-            var documents = await _context.Documents.AsNoTracking().Where(d => d.DirectoryId == directoryId).ToListAsync();
+        //public async Task<ICollection<Document>> GetDocumentsInDirectory(int directoryId)
+        //{
+        //    var documents = await _context.Documents.AsNoTracking().Where(d => d.DirectoryId == directoryId).ToListAsync();
 
-            return documents;
-        }
+        //    return documents;
+        //}
 
         public async Task<bool> UpdateAsync(DocumentDto dto)
         {

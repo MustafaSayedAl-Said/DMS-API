@@ -1,4 +1,5 @@
 ﻿using DMS.Core.Entities;
+using DMS.Core.Sharing;
 
 namespace DMS.Core.Interfaces
 {
@@ -6,6 +7,8 @@ namespace DMS.Core.Interfaces
     {
         public bool directoryExists(int id);
 
-        public Task<ICollection<MyDirectory>> GetDirectoriesInWorkspace(int workspaceId);
+        public Task<IEnumerable<MyDirectory>> GetAllAsync(DirectoryParams directoryParams);
+
+        //public Task<ICollection<MyDirectory>> GetDirectoriesInWorkspace(int workspaceId);
     }
 }
