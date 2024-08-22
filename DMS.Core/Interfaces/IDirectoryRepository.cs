@@ -7,7 +7,7 @@ namespace DMS.Core.Interfaces
     {
         public bool directoryExists(int id);
 
-        public Task<IEnumerable<MyDirectory>> GetAllAsync(DirectoryParams directoryParams);
+        public Task<(IEnumerable<MyDirectory>, int TotalCount)> GetAllAsync(DirectoryParams directoryParams);
 
         //public Task<ICollection<MyDirectory>> GetDirectoriesInWorkspace(int workspaceId);
     }

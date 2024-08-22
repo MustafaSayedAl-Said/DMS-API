@@ -25,9 +25,8 @@ namespace DMS.API.Controllers
 
         public async Task<IActionResult> Get([FromQuery]DirectoryParams directoryParams)
         {
-            var allDirectories = await _uOW.directoryRepository.GetAllAsync(directoryParams);
+            var (allDirectories, totalItems) = await _uOW.directoryRepository.GetAllAsync(directoryParams);
             var directories = _mapper.Map<List<MyDirectoryDto>>(allDirectories);
-            var totalItems = directories.Count;
             if (directories is not null)
             {
                 return Ok(new Pagination<MyDirectoryDto>(totalItems, directoryParams.PageSize, directoryParams.PageNumber, directories));

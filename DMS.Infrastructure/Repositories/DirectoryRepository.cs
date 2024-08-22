@@ -19,7 +19,7 @@ namespace DMS.Infrastructure.Repositories
             return _context.Directories.Any(d => d.Id == id);
         }
 
-        public async Task<IEnumerable<MyDirectory>> GetAllAsync(DirectoryParams directoryParams)
+        public async Task<(IEnumerable<MyDirectory>, int TotalCount)> GetAllAsync(DirectoryParams directoryParams)
         {
             List<MyDirectory> query;
 
@@ -37,6 +37,8 @@ namespace DMS.Infrastructure.Repositories
             if(!string.IsNullOrEmpty(directoryParams.Search))
                 query = query.Where(x => x.Name.ToLower().Contains(directoryParams.Search.ToLower())).ToList();
 
+            int totalCount = query.Count;
+
             //sorting
             if (!string.IsNullOrEmpty(directoryParams.Sort))
             {
@@ -51,7 +53,7 @@ namespace DMS.Infrastructure.Repositories
             //paging
             query = query.Skip((directoryParams.PageSize) * (directoryParams.PageNumber - 1)).Take(directoryParams.PageSize).ToList();
 
-            return query;
+            return (query, totalCount);
         }
 
         //public async Task<ICollection<MyDirectory>> GetDirectoriesInWorkspace(int workspaceId)
