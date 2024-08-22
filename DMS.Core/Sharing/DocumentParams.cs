@@ -15,7 +15,7 @@
 
         public string Sort { get; set; }
 
-        public int? DirectoryId { get; set; }
+        public int DirectoryId { get; set; }
 
         public int PageNumber { get; set; } = 1;
 

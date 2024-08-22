@@ -17,6 +17,7 @@ namespace DMS.Core.Dto
 
     public class DocumentGetDto
     {
+        public string UserName { get; set; }
         public string Name { get; set; }
 
         public int DirectoryId { get; set; }

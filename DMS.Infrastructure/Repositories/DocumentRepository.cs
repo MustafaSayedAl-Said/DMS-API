@@ -51,23 +51,26 @@ namespace DMS.Infrastructure.Repositories
             return false;
         }
 
-        public async Task<IEnumerable<Document>> GetAllAsync(DocumentParams documentParams)
+        public async Task<(IEnumerable<Document>, int TotalCount)> GetAllAsync(DocumentParams documentParams)
         {
             List<Document> query;
 
             //search by directoryId
-            if (documentParams.DirectoryId.HasValue)
-            {
-                query = await _context.Documents.AsNoTracking().Where(d => d.DirectoryId == documentParams.DirectoryId).ToListAsync();
-            }
-            else
-            {
-                query = await _context.Documents.AsNoTracking().ToListAsync();
-            }
+            query = await _context.Documents.AsNoTracking().Where(d => d.DirectoryId == documentParams.DirectoryId).ToListAsync();
+            //if (documentParams.DirectoryId.HasValue)
+            //{
+                
+            //}
+            //else
+            //{
+            //    query = await _context.Documents.AsNoTracking().ToListAsync();
+            //}
 
             //search by name
             if(!string.IsNullOrEmpty(documentParams.Search))
                 query = query.Where(x => x.Name.ToLower().Contains(documentParams.Search.ToLower())).ToList();
+
+            int totalCount = query.Count();
 
             //sorting
             if (!string.IsNullOrEmpty(documentParams.Sort))
@@ -83,7 +86,7 @@ namespace DMS.Infrastructure.Repositories
             //paging
             query = query.Skip((documentParams.PageSize) * (documentParams.PageNumber - 1)).Take(documentParams.PageSize).ToList();
 
-            return query;
+            return (query, totalCount);
         }
 
         public bool documentExists(int id)

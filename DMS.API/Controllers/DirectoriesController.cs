@@ -25,13 +25,18 @@ namespace DMS.API.Controllers
 
         public async Task<IActionResult> Get([FromQuery]DirectoryParams directoryParams)
         {
-            var (allDirectories, totalItems) = await _uOW.directoryRepository.GetAllAsync(directoryParams);
-            var directories = _mapper.Map<List<MyDirectoryDto>>(allDirectories);
-            if (directories is not null)
+            if (_uOW.workspaceRepository.workspaceExists(directoryParams.WorkspaceId))
             {
-                return Ok(new Pagination<MyDirectoryDto>(totalItems, directoryParams.PageSize, directoryParams.PageNumber, directories));
+                var (allDirectories, totalItems) = await _uOW.directoryRepository.GetAllAsync(directoryParams);
+                var directories = _mapper.Map<List<MyDirectoryDto>>(allDirectories);
+                if (directories is not null)
+                {
+                    return Ok(new Pagination<MyDirectoryDto>(totalItems, directoryParams.PageSize, directoryParams.PageNumber, directories));
+                }
+                return BadRequest();
             }
-            return BadRequest();
+            return BadRequest("Workspace doesn't exist");
+
         }
 
         [HttpGet("{id}")]

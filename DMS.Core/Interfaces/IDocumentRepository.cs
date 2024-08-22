@@ -6,7 +6,7 @@ namespace DMS.Core.Interfaces
 {
     public interface IDocumentRepository : IGenericRepository<Document>
     {
-        public Task<IEnumerable<Document>> GetAllAsync(DocumentParams documentParams);
+        public Task<(IEnumerable<Document>, int TotalCount)> GetAllAsync(DocumentParams documentParams);
 
         public bool documentExists(int id);
 

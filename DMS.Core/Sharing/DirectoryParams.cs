@@ -20,7 +20,7 @@ namespace DMS.Core.Sharing
 
         public string Sort { get; set; }
 
-        public int? WorkspaceId { get; set; }
+        public int WorkspaceId { get; set; }
 
         public int PageNumber { get; set; } = 1;
 

@@ -24,14 +24,15 @@ namespace DMS.Infrastructure.Repositories
             List<MyDirectory> query;
 
             //search by WorkspaceId
-            if(directoryParams.WorkspaceId.HasValue)
-            {
-                query = await _context.Directories.AsNoTracking().Where(d => d.WorkspaceId == directoryParams.WorkspaceId).ToListAsync();
-            }
-            else
-            {
-                query = await _context.Directories.AsNoTracking().ToListAsync();
-            }
+            query = await _context.Directories.AsNoTracking().Where(d => d.WorkspaceId == directoryParams.WorkspaceId).ToListAsync();
+            //if (directoryParams.WorkspaceId.HasValue)
+            //{
+                
+            //}
+            //else
+            //{
+            //    query = await _context.Directories.AsNoTracking().ToListAsync();
+            //}
 
             //search by name
             if(!string.IsNullOrEmpty(directoryParams.Search))

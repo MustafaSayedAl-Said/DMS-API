@@ -4,6 +4,7 @@ using DMS.Core.Dto;
 using DMS.Core.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using DMS.API.Helper;
+using System.IO;
 
 namespace DMS.API.Controllers
 {
@@ -24,16 +25,27 @@ namespace DMS.API.Controllers
 
         public async Task<IActionResult> Get([FromQuery]DocumentParams documentParams)
         {
-            var allDocuments = await _uOW.documentRepository.GetAllAsync(documentParams);
-            var documents = _mapper.Map<IReadOnlyList<DocumentGetDto>>(allDocuments);
-            var totalItems = documents.Count;
-
-            if (documents is not null)
+            if (_uOW.directoryRepository.directoryExists(documentParams.DirectoryId))
             {
-                return Ok(new Pagination<DocumentGetDto>(totalItems, documentParams.PageSize, documentParams.PageNumber, documents));
-            }
+                var (allDocuments, totalItems) = await _uOW.documentRepository.GetAllAsync(documentParams);
+                var documents = _mapper.Map<IReadOnlyList<DocumentGetDto>>(allDocuments);
 
-            return BadRequest();
+                if (documents is not null)
+                {
+                    var directory = await _uOW.directoryRepository.GetAsync(documentParams.DirectoryId);
+                    var userId = _uOW.workspaceRepository.getUserId(directory.WorkspaceId);
+                    var User = await _uOW.userRepository.GetAsync(userId);
+                    foreach (var document in documents)
+                    {
+                        document.UserName = User.email;
+                    }
+                    return Ok(new Pagination<DocumentGetDto>(totalItems, documentParams.PageSize, documentParams.PageNumber, documents));
+                }
+
+                return BadRequest();
+            }
+            return BadRequest("Directory doesn't exist");
+
         }
 
         [HttpGet("{id}")]
