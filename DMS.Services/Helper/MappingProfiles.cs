@@ -1,9 +1,8 @@
 ﻿using AutoMapper;
-using DMS.API.Helper;
 using DMS.Core.Dto;
 using DMS.Core.Entities;
 
-namespace Document_Management_System.Helper
+namespace DMS.Services.Helper
 {
     public class MappingProfiles : Profile
     {

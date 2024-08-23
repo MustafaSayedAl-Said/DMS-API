@@ -3,6 +3,7 @@ using DMS.API.Errors;
 using DMS.Core.Dto;
 using DMS.Core.Entities;
 using DMS.Core.Interfaces;
+using DMS.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DMS.API.Controllers
@@ -11,61 +12,57 @@ namespace DMS.API.Controllers
     [ApiController]
     public class WorkspacesController : ControllerBase
     {
-        private readonly IUnitOfWork _uOW;
-        private readonly IMapper _mapper;
-        public WorkspacesController(IUnitOfWork UOW, IMapper mapper)
+        private readonly IWorkspaceService _workspaceService;
+        public WorkspacesController(IWorkspaceService workspaceService)
         {
-            _uOW = UOW;
-            _mapper = mapper;
+            _workspaceService = workspaceService;
         }
 
         [HttpGet]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(BaseCommonResponse), StatusCodes.Status404NotFound)]
+        //[ProducesResponseType(StatusCodes.Status200OK)]
+        //[ProducesResponseType(typeof(BaseCommonResponse), StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Get()
         {
-            var allWorkspaces = await _uOW.workspaceRepository.GetAllAsync();
-            var workspaces = _mapper.Map<List<WorkspaceDto>>(allWorkspaces);
-            if (allWorkspaces is not null)
+            try
             {
+                var workspaces = await _workspaceService.GetAllWorkspacesAsync();
                 return Ok(workspaces);
             }
-            return NotFound(new BaseCommonResponse(404));
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpGet("{id}")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(BaseCommonResponse), StatusCodes.Status404NotFound)]
-
-
+        //[ProducesResponseType(StatusCodes.Status200OK)]
+        //[ProducesResponseType(typeof(BaseCommonResponse), StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Get(int id)
         {
-            var workspace = await _uOW.workspaceRepository.GetAsync(id);
-            var workspaceDto = _mapper.Map<WorkspaceDto>(workspace);
-            if (workspace is not null)
+            try
             {
+                var workspaceDto = await _workspaceService.GetWorkspaceByIdAsync(id);
                 return Ok(workspaceDto);
             }
-
-            return NotFound(new BaseCommonResponse(404));
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpGet("user/{userId}")]
 
         public async Task<IActionResult> GetByUser(int userId)
         {
-            if (_uOW.userRepository.userExists(userId))
+            try
             {
-                var workspace = await _uOW.workspaceRepository.getWorkspaceByUserId(userId);
-                var workspaceDto = _mapper.Map<WorkspaceDto>(workspace);
-                if (workspace is not null)
-                {
-                    return Ok(workspaceDto);
-                }
-
-                return BadRequest(new BaseCommonResponse(500));
+                var workspaceDto = await _workspaceService.GetWorkspaceByUserIdAsync(userId);
+                return Ok(workspaceDto);
             }
-            return NotFound(new BaseCommonResponse(404)); ;
+            catch(Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpPost]
@@ -75,8 +72,7 @@ namespace DMS.API.Controllers
             {
                 if (ModelState.IsValid)
                 {
-                    var workspaceMap = _mapper.Map<Workspace>(workspaceDto);
-                    await _uOW.workspaceRepository.AddAsync(workspaceMap);
+                    await _workspaceService.AddWorkspaceAsync(workspaceDto);
                     return Ok(workspaceDto);
                 }
 
@@ -96,17 +92,10 @@ namespace DMS.API.Controllers
         {
             try
             {
-                if (workspaceDto == null)
-                    return BadRequest(ModelState);
                 if (ModelState.IsValid)
                 {
-                    if (_uOW.workspaceRepository.workspaceExists(workspaceDto.id))
-                    {
-                        var workspaceMap = _mapper.Map<Workspace>(workspaceDto);
-                        await _uOW.workspaceRepository.UpdateAsync(workspaceMap);
-                        return Ok(workspaceDto);
-                    }
-                    return BadRequest($"Workspace Not Found, Id [{workspaceDto.id}] is Incorrect");
+                    await _workspaceService.UpdateWorkspaceAsync(workspaceDto);
+                    return Ok(workspaceDto);
                 }
                 return BadRequest(ModelState);
             }
@@ -125,14 +114,8 @@ namespace DMS.API.Controllers
             {
                 if (ModelState.IsValid)
                 {
-                    if (_uOW.workspaceRepository.workspaceExists(id))
-                    {
-                        var userId = _uOW.workspaceRepository.getUserId(id);
-                        await _uOW.workspaceRepository.DeleteAsync(id);
-                        await _uOW.userRepository.DeleteAsync(userId);
-                        return Ok("Workspace was deleted!");
-                    }
-                    return BadRequest($"Workspace Not Found, Id [{id}] Incorrect");
+                    await _workspaceService.DeleteWorkspaceAsync(id);
+                    return Ok("Workspace was deleted!");
                 }
                 return BadRequest(ModelState);
             }

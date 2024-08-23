@@ -1,6 +1,6 @@
 ﻿namespace DMS.API.Helper
 {
-    public class Pagination <T> where T : class
+    public class Pagination<T> where T : class
     {
         public Pagination(int count, int pageSize, int pageNumber, IReadOnlyList<T> data)
         {

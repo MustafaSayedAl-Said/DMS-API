@@ -1,9 +1,7 @@
-﻿using AutoMapper;
-using DMS.API.Helper;
+﻿using DMS.API.Helper;
 using DMS.Core.Dto;
-using DMS.Core.Entities;
-using DMS.Core.Interfaces;
 using DMS.Core.Sharing;
+using DMS.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DMS.API.Controllers
@@ -12,30 +10,25 @@ namespace DMS.API.Controllers
     [ApiController]
     public class DirectoriesController : ControllerBase
     {
-        private readonly IUnitOfWork _uOW;
-        private readonly IMapper _mapper;
-
-        public DirectoriesController(IUnitOfWork UOW, IMapper mapper)
+        private readonly IDirectoryService _directoryService;
+        public DirectoriesController(IDirectoryService directoryService)
         {
-            _uOW = UOW;
-            _mapper = mapper;
+            _directoryService = directoryService;
         }
 
         [HttpGet]
 
-        public async Task<IActionResult> Get([FromQuery]DirectoryParams directoryParams)
+        public async Task<IActionResult> Get([FromQuery] DirectoryParams directoryParams)
         {
-            if (_uOW.workspaceRepository.workspaceExists(directoryParams.WorkspaceId))
+            try
             {
-                var (allDirectories, totalItems) = await _uOW.directoryRepository.GetAllAsync(directoryParams);
-                var directories = _mapper.Map<List<MyDirectoryDto>>(allDirectories);
-                if (directories is not null)
-                {
-                    return Ok(new Pagination<MyDirectoryDto>(totalItems, directoryParams.PageSize, directoryParams.PageNumber, directories));
-                }
-                return BadRequest();
+                var (directories, totalItems) = await _directoryService.GetAllDirectoriesAsync(directoryParams);
+                return Ok(new Pagination<MyDirectoryDto>(totalItems, directoryParams.PageSize, directoryParams.PageNumber, directories));
             }
-            return BadRequest("Workspace doesn't exist");
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
 
         }
 
@@ -43,31 +36,17 @@ namespace DMS.API.Controllers
 
         public async Task<IActionResult> Get(int id)
         {
-            var directory = await _uOW.directoryRepository.GetAsync(id);
-            var directoryDto = _mapper.Map<MyDirectoryDto>(directory);
-            if (directoryDto is not null)
+            try
             {
+                var directoryDto = await _directoryService.GetDirectoryByIdAsync(id);
                 return Ok(directoryDto);
             }
-            return BadRequest($"This id [{id}] was Not Found");
+
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
-
-        //[HttpGet("workspace/{workspaceId}")]
-
-        //public async Task<IActionResult> DirectoriesInWorkspace(int workspaceId)
-        //{
-        //    if (_uOW.workspaceRepository.workspaceExists(workspaceId))
-        //    {
-        //        var directories = await _uOW.directoryRepository.GetDirectoriesInWorkspace(workspaceId);
-        //        var directoriesMap = _mapper.Map<List<MyDirectoryDto>>(directories);
-        //        if (directoriesMap is not null)
-        //        {
-        //            return Ok(directoriesMap);
-        //        }
-        //        return BadRequest("Something went wrong");
-        //    }
-        //    return BadRequest("Workspace doesn't exist");
-        //}
 
         [HttpPost]
 
@@ -77,13 +56,11 @@ namespace DMS.API.Controllers
             {
                 if (ModelState.IsValid)
                 {
-                    if (_uOW.workspaceRepository.workspaceExists(directoryDto.WorkspaceId))
-                    {
-                        var directoryMap = _mapper.Map<MyDirectory>(directoryDto);
-                        await _uOW.directoryRepository.AddAsync(directoryMap);
+                    var result = await _directoryService.AddDirectoryAsync(directoryDto);
+                    if (result)
                         return Ok(directoryDto);
-                    }
-                    return NotFound("Workspace Was Not Found");
+
+                    return BadRequest("Error occurred while adding the directory");
                 }
 
                 return BadRequest(ModelState);
@@ -100,17 +77,12 @@ namespace DMS.API.Controllers
         {
             try
             {
-                if (directoryDto is null)
-                    return BadRequest(ModelState);
                 if (ModelState.IsValid)
                 {
-                    if (_uOW.directoryRepository.directoryExists(directoryDto.id))
-                    {
-                        var directoryMap = _mapper.Map<MyDirectory>(directoryDto);
-                        await _uOW.directoryRepository.UpdateAsync(directoryMap);
+                    var result = await _directoryService.UpdateDirectoryAsync(directoryDto);
+                    if (result)
                         return Ok(directoryDto);
-                    }
-                    return BadRequest($"Directory Not Found, Id [{directoryDto.id}] is Incorrect");
+                    return BadRequest("Error occurred while updating the directory");
                 }
                 return BadRequest(ModelState);
             }
@@ -128,12 +100,10 @@ namespace DMS.API.Controllers
             {
                 if (ModelState.IsValid)
                 {
-                    if (_uOW.directoryRepository.directoryExists(id))
-                    {
-                        await _uOW.directoryRepository.DeleteAsync(id);
+                    var result = await _directoryService.DeleteDirectoryAsync(id);
+                    if (result)
                         return Ok("Directory was deleted!");
-                    }
-                    return BadRequest($"Directory Not Found, Id [{id}] is Incorrect");
+                    return BadRequest("Error occurred while deleting the directory");
                 }
                 return BadRequest(ModelState);
             }

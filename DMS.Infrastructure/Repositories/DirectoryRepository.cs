@@ -27,7 +27,7 @@ namespace DMS.Infrastructure.Repositories
             query = await _context.Directories.AsNoTracking().Where(d => d.WorkspaceId == directoryParams.WorkspaceId).ToListAsync();
             //if (directoryParams.WorkspaceId.HasValue)
             //{
-                
+
             //}
             //else
             //{
@@ -35,7 +35,7 @@ namespace DMS.Infrastructure.Repositories
             //}
 
             //search by name
-            if(!string.IsNullOrEmpty(directoryParams.Search))
+            if (!string.IsNullOrEmpty(directoryParams.Search))
                 query = query.Where(x => x.Name.ToLower().Contains(directoryParams.Search.ToLower())).ToList();
 
             int totalCount = query.Count;

@@ -1,10 +1,8 @@
-﻿using AutoMapper;
-using DMS.Core.Sharing;
+﻿using DMS.API.Helper;
 using DMS.Core.Dto;
-using DMS.Core.Interfaces;
+using DMS.Core.Sharing;
+using DMS.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using DMS.API.Helper;
-using System.IO;
 
 namespace DMS.API.Controllers
 {
@@ -12,39 +10,26 @@ namespace DMS.API.Controllers
     [ApiController]
     public class DocumentsController : ControllerBase
     {
-        private readonly IUnitOfWork _uOW;
-        private readonly IMapper _mapper;
+        private readonly IDocumentService _documentService;
 
-        public DocumentsController(IUnitOfWork UOW, IMapper mapper)
+        public DocumentsController(IDocumentService documentService)
         {
-            _uOW = UOW;
-            _mapper = mapper;
+            _documentService = documentService;
         }
 
         [HttpGet]
 
-        public async Task<IActionResult> Get([FromQuery]DocumentParams documentParams)
+        public async Task<IActionResult> Get([FromQuery] DocumentParams documentParams)
         {
-            if (_uOW.directoryRepository.directoryExists(documentParams.DirectoryId))
+            try
             {
-                var (allDocuments, totalItems) = await _uOW.documentRepository.GetAllAsync(documentParams);
-                var documents = _mapper.Map<IReadOnlyList<DocumentGetDto>>(allDocuments);
-
-                if (documents is not null)
-                {
-                    var directory = await _uOW.directoryRepository.GetAsync(documentParams.DirectoryId);
-                    var userId = _uOW.workspaceRepository.getUserId(directory.WorkspaceId);
-                    var User = await _uOW.userRepository.GetAsync(userId);
-                    foreach (var document in documents)
-                    {
-                        document.UserName = User.email;
-                    }
-                    return Ok(new Pagination<DocumentGetDto>(totalItems, documentParams.PageSize, documentParams.PageNumber, documents));
-                }
-
-                return BadRequest();
+                var (documents, totalItems) = await _documentService.GetAllDocumentsAsync(documentParams);
+                return Ok(new Pagination<DocumentGetDto>(totalItems, documentParams.PageSize, documentParams.PageNumber, documents));
             }
-            return BadRequest("Directory doesn't exist");
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
 
         }
 
@@ -52,31 +37,20 @@ namespace DMS.API.Controllers
 
         public async Task<IActionResult> Get(int id)
         {
-            var document = await _uOW.documentRepository.GetAsync(id);
-            var documentDto = _mapper.Map<DocumentGetDto>(document);
-            if (documentDto is not null)
+            try
             {
-                return Ok(documentDto);
+                var document = await _documentService.GetDocumentByIdAsync(id);
+                if (document != null)
+                {
+                    return Ok(document);
+                }
+                return NotFound($"Document with ID [{id}] was not found.");
             }
-            return BadRequest($"This id [{id}] was Not Found");
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
-
-        //[HttpGet("directory/{directoryId}")]
-
-        //public async Task<IActionResult> DocumentsInDirectory(int directoryId)
-        //{
-        //    if (_uOW.directoryRepository.directoryExists(directoryId))
-        //    {
-        //        var documents = await _uOW.documentRepository.GetDocumentsInDirectory(directoryId);
-        //        var documentsMap = _mapper.Map<List<DocumentGetDto>>(documents);
-        //        if (documentsMap is not null)
-        //        {
-        //            return Ok(documentsMap);
-        //        }
-        //        return BadRequest("Something went wrong");
-        //    }
-        //    return BadRequest("Directory doesn't exist");
-        //}
 
         [HttpPost]
 
@@ -86,12 +60,10 @@ namespace DMS.API.Controllers
             {
                 if (ModelState.IsValid)
                 {
-                    if (_uOW.directoryRepository.directoryExists(documentDto.DirectoryId))
-                    {
-                        var res = await _uOW.documentRepository.AddSync(documentDto);
-                        return res ? Ok(documentDto) : BadRequest("Something went wrong");
-                    }
-                    return NotFound("Directory Was Not Found");
+                    var result = await _documentService.AddDocumentAsync(documentDto);
+                    if (result)
+                        return Ok(documentDto);
+                    return BadRequest("Error occurred while adding the document.");
                 }
 
                 return BadRequest(ModelState);
@@ -108,16 +80,12 @@ namespace DMS.API.Controllers
         {
             try
             {
-                if (documentDto is null)
-                    return BadRequest(ModelState);
                 if (ModelState.IsValid)
                 {
-                    if (_uOW.documentRepository.documentExists(documentDto.Id))
-                    {
-                        var res = await _uOW.documentRepository.UpdateAsync(documentDto);
-                        return res ? Ok(documentDto) : BadRequest("Something went wrong");
-                    }
-                    return BadRequest($"Document Not Found, Id [{documentDto.Id}] is Incorrect");
+                    var result = await _documentService.UpdateDocumentAsync(documentDto);
+                    if (result)
+                        return Ok(documentDto);
+                    return BadRequest("Error occurred while updating the document.");
                 }
                 return BadRequest(ModelState);
             }
@@ -135,12 +103,10 @@ namespace DMS.API.Controllers
             {
                 if (ModelState.IsValid)
                 {
-                    if (_uOW.documentRepository.documentExists(id))
-                    {
-                        await _uOW.documentRepository.DeleteAsync(id);
+                    var result = await _documentService.DeleteDocumentAsync(id);
+                    if (result)
                         return Ok("Document was deleted!");
-                    }
-                    return BadRequest($"Document Not Found, Id [{id}] is Incorrect");
+                    return BadRequest($"Document with ID [{id}] was not found");
                 }
                 return BadRequest(ModelState);
             }

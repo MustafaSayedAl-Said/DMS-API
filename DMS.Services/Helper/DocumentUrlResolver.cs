@@ -1,8 +1,9 @@
 ﻿using AutoMapper;
 using DMS.Core.Dto;
 using DMS.Core.Entities;
+using Microsoft.Extensions.Configuration;
 
-namespace DMS.API.Helper
+namespace DMS.Services.Helper
 {
     public class DocumentUrlResolver : IValueResolver<Document, DocumentGetDto, string>
     {

@@ -1,4 +1,6 @@
 ﻿using DMS.API.Errors;
+using DMS.Services.Interfaces;
+using DMS.Services.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.FileProviders;
 
@@ -9,6 +11,9 @@ namespace DMS.API.Extensions
         public static IServiceCollection AddApiRegistration(this IServiceCollection services)
         {
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+            services.AddScoped<IDocumentService, DocumentService>();
+            services.AddScoped<IDirectoryService, DirectoryService>();
+            services.AddScoped<IWorkspaceService, WorkspaceService>();
             //Configure IFileProvider
             services.AddSingleton<IFileProvider>(new PhysicalFileProvider(
                 Path.Combine(Directory.GetCurrentDirectory(), "wwwroot")));

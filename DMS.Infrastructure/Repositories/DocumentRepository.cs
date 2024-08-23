@@ -59,7 +59,7 @@ namespace DMS.Infrastructure.Repositories
             query = await _context.Documents.AsNoTracking().Where(d => d.DirectoryId == documentParams.DirectoryId).ToListAsync();
             //if (documentParams.DirectoryId.HasValue)
             //{
-                
+
             //}
             //else
             //{
@@ -67,7 +67,7 @@ namespace DMS.Infrastructure.Repositories
             //}
 
             //search by name
-            if(!string.IsNullOrEmpty(documentParams.Search))
+            if (!string.IsNullOrEmpty(documentParams.Search))
                 query = query.Where(x => x.Name.ToLower().Contains(documentParams.Search.ToLower())).ToList();
 
             int totalCount = query.Count();
