@@ -35,8 +35,12 @@ app.UseStaticFiles();
 // Enable CORS for the specified policy
 app.UseCors("AllowAngularApp");
 
+app.UseAuthentication();
+
 app.UseAuthorization();
 
 app.MapControllers();
+
+InfrastructureRegistration.InfrastructureConfigMiddleWare(app);
 
 app.Run();

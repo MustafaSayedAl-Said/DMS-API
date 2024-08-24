@@ -31,7 +31,7 @@ namespace DMS.Services.Services
                     var User = await _uOW.userRepository.GetAsync(userId);
                     foreach (var document in documents)
                     {
-                        document.UserName = User.email;
+                        document.UserName = User.Email;
                     }
                     return (documents, totalItems);
                 }

@@ -23,5 +23,7 @@ namespace DMS.Core.Dto
         public int DirectoryId { get; set; }
 
         public string DocumentContent { get; set; }
+
+        public DateTime ModifyDate { get; set; }
     }
 }

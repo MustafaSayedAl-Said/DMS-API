@@ -4,6 +4,6 @@ namespace DMS.Core.Interfaces
 {
     public interface IUserRepository : IGenericRepository<User>
     {
-        public bool userExists(int id);
+        //public bool userExists(int id);
     }
 }

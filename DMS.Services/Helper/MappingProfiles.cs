@@ -9,7 +9,7 @@ namespace DMS.Services.Helper
         public MappingProfiles()
         {
             // User Mappings
-            CreateMap<User, UserDto>().ReverseMap();
+            CreateMap<User, LoginDto>().ReverseMap();
 
             // Document Mappings
             CreateMap<Document, DocumentGetDto>()

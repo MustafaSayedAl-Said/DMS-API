@@ -1,6 +1,11 @@
-﻿using DMS.Core.Interfaces;
+﻿using DMS.Core.Entities;
+using DMS.Core.Interfaces;
 using DMS.Infrastructure.Data;
+using DMS.Infrastructure.Data.Config;
 using DMS.Infrastructure.Repositories;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -23,7 +28,26 @@ namespace DMS.Infrastructure
             {
                 opt.UseSqlServer(configuration.GetConnectionString("DefaultConnection"));
             });
+
+            services.AddIdentity<User, IdentityRole<int>>()
+                .AddEntityFrameworkStores<DataContext>()
+                .AddDefaultTokenProviders();
+            services.AddMemoryCache();
+            services.AddAuthentication(opt =>
+            {
+                opt.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+            });
+
             return services;
+        }
+
+        public static async void InfrastructureConfigMiddleWare(this IApplicationBuilder app)
+        {
+            using(var scope = app.ApplicationServices.CreateScope())
+            {
+                var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
+                await IdentitySeed.SeedUserAsync(userManager);
+            }
         }
     }
 }

@@ -14,6 +14,12 @@ namespace DMS.Core.Entities
 
         public string DocumentContent { get; set; }
 
+        public string OwnerName { get; set; }
+
+        public DateTime ModifyDate { get; set; }
+
+        public bool IsPublic { get; set; }
+
         public virtual MyDirectory MyDirectory { get; set; }
     }
 }

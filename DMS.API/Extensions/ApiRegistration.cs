@@ -10,6 +10,7 @@ namespace DMS.API.Extensions
     {
         public static IServiceCollection AddApiRegistration(this IServiceCollection services)
         {
+
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             services.AddScoped<IDocumentService, DocumentService>();
             services.AddScoped<IDirectoryService, DirectoryService>();

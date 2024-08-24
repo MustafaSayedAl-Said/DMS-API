@@ -62,10 +62,10 @@ namespace DMS.Services.Services
 
         public async Task<WorkspaceDto> GetWorkspaceByUserIdAsync(int userId)
         {
-            if (!_uOW.userRepository.userExists(userId))
-            {
-                throw new Exception("User Not Found");
-            }
+            //if (!_uOW.userRepository.userExists(userId))
+            //{
+            //    throw new Exception("User Not Found");
+            //}
             var workspace = await _uOW.workspaceRepository.getWorkspaceByUserId(userId);
             if (workspace == null)
             {

@@ -12,9 +12,9 @@ namespace DMS.Infrastructure.Repositories
             _context = context;
         }
 
-        public bool userExists(int id)
-        {
-            return _context.Users.Any(u => u.Id == id);
-        }
+        //public bool userExists(int id)
+        //{
+        //    return _context.Users.Any(u => u.Id == id);
+        //}
     }
 }
