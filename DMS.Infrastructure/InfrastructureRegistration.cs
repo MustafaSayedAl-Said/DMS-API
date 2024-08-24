@@ -4,11 +4,14 @@ using DMS.Infrastructure.Data;
 using DMS.Infrastructure.Data.Config;
 using DMS.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 namespace DMS.Infrastructure
 {
@@ -16,6 +19,8 @@ namespace DMS.Infrastructure
     {
         public static IServiceCollection InfrastructureConfiguration(this IServiceCollection services, IConfiguration configuration)
         {
+            //configure token services
+            services.AddScoped<ITokenService, TokenService>();
             services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
             /*services.AddScoped<IWorkspaceRepository, WorkspaceRepository>();
             services.AddScoped<IDirectoryRepository, DirectoryRepository>();
@@ -33,10 +38,24 @@ namespace DMS.Infrastructure
                 .AddEntityFrameworkStores<DataContext>()
                 .AddDefaultTokenProviders();
             services.AddMemoryCache();
-            services.AddAuthentication(opt =>
+            services.AddAuthentication(options =>
             {
-                opt.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-            });
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+                .AddJwtBearer(opt =>
+                {
+                    opt.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuerSigningKey = true,
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration[key: "Token:key"])),
+                        ValidIssuer = configuration[key: "Token:Issuer"],
+                        ValidAudience = configuration[key: "Token:Audience"],
+                        ValidateIssuer = true,
+                        ValidateLifetime = true,
+                        ValidateAudience = true,
+                    };
+                });
 
             return services;
         }
