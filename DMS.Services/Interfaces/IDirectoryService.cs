@@ -1,5 +1,7 @@
-﻿using DMS.Core.Dto;
+﻿using Azure;
+using DMS.Core.Dto;
 using DMS.Core.Sharing;
+using Microsoft.AspNetCore.JsonPatch;
 
 namespace DMS.Services.Interfaces
 {
@@ -13,6 +15,13 @@ namespace DMS.Services.Interfaces
 
         Task<bool> UpdateDirectoryAsync(MyDirectoryDto directoryDto);
 
-        Task<bool> DeleteDirectoryAsync(int id);
+        Task<bool> SoftDeleteDirectoryAsync(int id);
+
+        public Task<bool> VerifyWorkspaceOwnershipAsync(int workspaceId, int userId);
+
+        public Task<bool> VerifyDirectoryOwnershipAsync(int directoryId, int userId);
+
+        public Task<bool> UpdateDirectoryNameAsync(int id, string newName);
+
     }
 }

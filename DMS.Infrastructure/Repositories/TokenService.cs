@@ -26,6 +26,7 @@ namespace DMS.Infrastructure.Repositories
         {
             var claims = new List<Claim>()
             {
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new Claim(JwtRegisteredClaimNames.Email, user.Email),
                 new Claim(JwtRegisteredClaimNames.GivenName, user.DisplayName),
             };

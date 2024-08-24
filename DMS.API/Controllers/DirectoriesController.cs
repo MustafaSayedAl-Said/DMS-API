@@ -3,6 +3,7 @@ using DMS.Core.Dto;
 using DMS.Core.Sharing;
 using DMS.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace DMS.API.Controllers
 {
@@ -22,6 +23,19 @@ namespace DMS.API.Controllers
         {
             try
             {
+                var userId = HttpContext.User?.Claims?.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier)?.Value;
+                if(string.IsNullOrEmpty(userId))
+                {
+                    return Unauthorized("User is not authenticated");
+                }
+                // Check if the workspace belongs to the user
+                var isOwner = await _directoryService.VerifyWorkspaceOwnershipAsync(directoryParams.WorkspaceId, int.Parse(userId));
+
+                if(!isOwner)
+                {
+                    return Forbid("User is not authorized to access this workspace");
+                }
+
                 var (directories, totalItems) = await _directoryService.GetAllDirectoriesAsync(directoryParams);
                 return Ok(new Pagination<MyDirectoryDto>(totalItems, directoryParams.PageSize, directoryParams.PageNumber, directories));
             }
@@ -56,6 +70,21 @@ namespace DMS.API.Controllers
             {
                 if (ModelState.IsValid)
                 {
+                    var userId = HttpContext.User?.Claims?.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier)?.Value;
+                    
+                    if(string.IsNullOrEmpty(userId))
+                    {
+                        return Unauthorized("User is not authenticated");
+                    }
+
+                    // Verify if the workspace belongs to the user
+                    var isOwner = await _directoryService.VerifyWorkspaceOwnershipAsync(directoryDto.WorkspaceId, int.Parse(userId));
+
+                    if (!isOwner)
+                    {
+                        return Forbid("User is not authorized to access this workspace");
+                    }
+
                     var result = await _directoryService.AddDirectoryAsync(directoryDto);
                     if (result)
                         return Ok(directoryDto);
@@ -71,26 +100,6 @@ namespace DMS.API.Controllers
             }
         }
 
-        [HttpPut]
-
-        public async Task<ActionResult> Put(MyDirectoryDto directoryDto)
-        {
-            try
-            {
-                if (ModelState.IsValid)
-                {
-                    var result = await _directoryService.UpdateDirectoryAsync(directoryDto);
-                    if (result)
-                        return Ok(directoryDto);
-                    return BadRequest("Error occurred while updating the directory");
-                }
-                return BadRequest(ModelState);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
-        }
 
         [HttpDelete("{id}")]
 
@@ -98,19 +107,69 @@ namespace DMS.API.Controllers
         {
             try
             {
-                if (ModelState.IsValid)
+                var userId = HttpContext.User?.Claims?.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier).Value;
+
+                if (string.IsNullOrEmpty(userId))
                 {
-                    var result = await _directoryService.DeleteDirectoryAsync(id);
-                    if (result)
-                        return Ok("Directory was deleted!");
-                    return BadRequest("Error occurred while deleting the directory");
+                    return Unauthorized("User is not authenticated");
                 }
-                return BadRequest(ModelState);
+                var isOwner = await _directoryService.VerifyDirectoryOwnershipAsync(id, int.Parse(userId));
+                
+                if(!isOwner)
+                {
+                    return Forbid("User is not authorized to delete this directory");
+                }
+
+                var result = await _directoryService.SoftDeleteDirectoryAsync(id);
+
+                if (result)
+                {
+                    return Ok("Directory and its documents were soft deleted successfully");
+                }
+                return BadRequest("Error occurred while deleting the directory");
             }
             catch (Exception ex)
             {
                 return BadRequest(ex.Message);
             }
         }
+
+        [HttpPatch("{id}")]
+        public async Task<ActionResult> Patch(int id, [FromBody] string newName)
+        {
+            if (string.IsNullOrEmpty(newName))
+            {
+                return BadRequest("Invalid patch document");
+            }
+            try
+            {
+                var userId = HttpContext.User?.Claims?.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier)?.Value;
+
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Unauthorized("User is not authenticated or user ID is invalid");
+                }
+
+                var isOwner = await _directoryService.VerifyDirectoryOwnershipAsync(id, int.Parse(userId));
+
+                if (!isOwner)
+                {
+                    return Forbid("User is not authorized to modify this directory");
+                }
+
+                var result = await _directoryService.UpdateDirectoryNameAsync(id, newName);
+
+                if (!result)
+                {
+                    return BadRequest("Error occurred while updating the directory name");
+                }
+                return Ok("Directory name updated successfully");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
     }
 }

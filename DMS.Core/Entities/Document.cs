@@ -20,6 +20,8 @@ namespace DMS.Core.Entities
 
         public bool IsPublic { get; set; }
 
+        public bool IsDeleted { get; set; } = false;
+
         public virtual MyDirectory MyDirectory { get; set; }
     }
 }

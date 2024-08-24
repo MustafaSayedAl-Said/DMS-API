@@ -1,4 +1,5 @@
-﻿using DMS.Core.Entities;
+﻿using DMS.Core.Dto;
+using DMS.Core.Entities;
 using DMS.Core.Interfaces;
 using DMS.Core.Sharing;
 using DMS.Infrastructure.Data;
@@ -24,7 +25,7 @@ namespace DMS.Infrastructure.Repositories
             List<MyDirectory> query;
 
             //search by WorkspaceId
-            query = await _context.Directories.AsNoTracking().Where(d => d.WorkspaceId == directoryParams.WorkspaceId).ToListAsync();
+            query = await _context.Directories.AsNoTracking().Where(d => d.WorkspaceId == directoryParams.WorkspaceId && d.IsDeleted == false).ToListAsync();
             //if (directoryParams.WorkspaceId.HasValue)
             //{
 
@@ -55,6 +56,54 @@ namespace DMS.Infrastructure.Repositories
             query = query.Skip((directoryParams.PageSize) * (directoryParams.PageNumber - 1)).Take(directoryParams.PageSize).ToList();
 
             return (query, totalCount);
+        }
+
+        public async Task<MyDirectory> GetDirectoryWithDocumentsAsync(int id)
+        {
+            return await _context.Directories.Include(d => d.Documents).FirstOrDefaultAsync(d => d.Id == id);
+        }
+
+        public async Task<MyDirectory> GetDirectoryWithWorkspaceAsync(int id)
+        {
+            return await _context.Directories.Include(d => d.Workspace).FirstOrDefaultAsync(d => d.Id == id);
+        }
+
+        public async Task<bool> SoftDeleteDirectoryAsync(int id)
+        {
+            var directory = await _context.Directories.Include(d => d.Documents).FirstOrDefaultAsync(d => d.Id == id);
+
+            if (directory == null)
+            {
+                throw new Exception("Something Went Wrong");
+            }
+
+            directory.IsDeleted = true;
+
+            foreach(var document in directory.Documents)
+            {
+                document.IsDeleted = true;
+            }
+
+            _context.Directories.Update(directory);
+            await _context.SaveChangesAsync();
+
+            return true;
+        }
+
+        public async Task<bool> UpdateDirectoryNameAsync(string newName, int directoryId)
+        {
+            var directory = await _context.Directories.FirstOrDefaultAsync(d => d.Id == directoryId);
+
+            if(directory == null)
+            {
+                throw new Exception("Something went wrong");
+            }
+
+            directory.Name = newName;
+            _context.Directories.Update(directory);
+            await _context.SaveChangesAsync();
+
+            return true;
         }
 
         //public async Task<ICollection<MyDirectory>> GetDirectoriesInWorkspace(int workspaceId)

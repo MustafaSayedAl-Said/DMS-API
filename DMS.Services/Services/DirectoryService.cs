@@ -4,6 +4,7 @@ using DMS.Core.Entities;
 using DMS.Core.Interfaces;
 using DMS.Core.Sharing;
 using DMS.Services.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace DMS.Services.Services
 {
@@ -28,15 +29,12 @@ namespace DMS.Services.Services
             throw new Exception("Workspace Was Not Found");
         }
 
-        public async Task<bool> DeleteDirectoryAsync(int id)
+        public async Task<bool> SoftDeleteDirectoryAsync(int id)
         {
-            if (_uOW.directoryRepository.directoryExists(id))
-            {
-                await _uOW.directoryRepository.DeleteAsync(id);
-                return true;
-            }
+            var res = await _uOW.directoryRepository.SoftDeleteDirectoryAsync(id);
 
-            throw new Exception($"Directory Not Found, Id[{id}] is Incorrect");
+            return res;
+            
         }
 
         public async Task<(List<MyDirectoryDto>, int)> GetAllDirectoriesAsync(DirectoryParams directoryParams)
@@ -70,6 +68,42 @@ namespace DMS.Services.Services
                 return true;
             }
             throw new Exception($"Directory Not Found, ID [{directoryDto.id}] is Incorrect");
+        }
+
+        public async Task<bool> VerifyWorkspaceOwnershipAsync(int workspaceId, int userId)
+        {
+            if (!_uOW.workspaceRepository.workspaceExists(workspaceId))
+                throw new Exception($"Workspace with id [{workspaceId}] doesn't exist");
+
+            var workspace = await _uOW.workspaceRepository.GetAsync(workspaceId);
+
+            if (workspace.UserId != userId)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        public async Task<bool> VerifyDirectoryOwnershipAsync(int directoryId, int userId)
+        {
+            if (!_uOW.directoryRepository.directoryExists(directoryId))
+                throw new Exception("Directory doesn't exist");
+
+            var directory = await _uOW.directoryRepository.GetDirectoryWithWorkspaceAsync(directoryId);
+
+            return directory.Workspace.UserId == userId;
+
+        }
+
+        public async Task<bool> UpdateDirectoryNameAsync(int id, string newName)
+        {
+            if (!_uOW.directoryRepository.directoryExists(id))
+                throw new Exception("Directory doesn't Exist");
+            
+            var res = await _uOW.directoryRepository.UpdateDirectoryNameAsync(newName, id);
+
+            return res;
         }
     }
 }
