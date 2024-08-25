@@ -17,7 +17,6 @@ namespace DMS.Core.Dto
 
     public class DocumentGetDto
     {
-        public string UserName { get; set; }
         public string Name { get; set; }
 
         public int DirectoryId { get; set; }
@@ -25,5 +24,11 @@ namespace DMS.Core.Dto
         public string DocumentContent { get; set; }
 
         public DateTime ModifyDate { get; set; }
+
+        public bool IsPublic { get; set; }
+
+        public bool IsDeleted { get; set; }
+
+        public string OwnerName { get; set; }
     }
 }

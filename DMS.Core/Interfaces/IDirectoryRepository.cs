@@ -1,5 +1,4 @@
-﻿using DMS.Core.Dto;
-using DMS.Core.Entities;
+﻿using DMS.Core.Entities;
 using DMS.Core.Sharing;
 
 namespace DMS.Core.Interfaces

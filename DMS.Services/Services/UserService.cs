@@ -6,13 +6,6 @@ using DMS.Services.Extensions;
 using DMS.Services.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DMS.Services.Services
 {
@@ -85,7 +78,7 @@ namespace DMS.Services.Services
             if (CreatedUser is null)
                 throw new Exception("Something Went Wrong");
 
-                return new UserDto
+            return new UserDto
             {
                 DisplayName = registerDto.DisplayName,
                 Email = registerDto.Email,

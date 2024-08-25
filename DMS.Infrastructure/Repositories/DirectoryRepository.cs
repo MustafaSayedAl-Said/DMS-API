@@ -1,5 +1,4 @@
-﻿using DMS.Core.Dto;
-using DMS.Core.Entities;
+﻿using DMS.Core.Entities;
 using DMS.Core.Interfaces;
 using DMS.Core.Sharing;
 using DMS.Infrastructure.Data;
@@ -79,7 +78,7 @@ namespace DMS.Infrastructure.Repositories
 
             directory.IsDeleted = true;
 
-            foreach(var document in directory.Documents)
+            foreach (var document in directory.Documents)
             {
                 document.IsDeleted = true;
             }
@@ -94,7 +93,7 @@ namespace DMS.Infrastructure.Repositories
         {
             var directory = await _context.Directories.FirstOrDefaultAsync(d => d.Id == directoryId);
 
-            if(directory == null)
+            if (directory == null)
             {
                 throw new Exception("Something went wrong");
             }

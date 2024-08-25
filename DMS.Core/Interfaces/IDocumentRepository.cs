@@ -12,8 +12,12 @@ namespace DMS.Core.Interfaces
 
         //public Task<ICollection<Document>> GetDocumentsInDirectory(int directoryId);
 
-        Task<bool> AddSync(DocumentDto dto);
+        Task<bool> AddSync(DocumentDto dto, string name);
 
         Task<bool> UpdateAsync(DocumentDto dto);
+
+        public Task<bool> SoftDeleteDocumentAsync(int id);
+
+        public Task<bool> UpdateDocumentVisibilityAsync(int id);
     }
 }

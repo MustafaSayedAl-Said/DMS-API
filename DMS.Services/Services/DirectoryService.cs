@@ -4,7 +4,6 @@ using DMS.Core.Entities;
 using DMS.Core.Interfaces;
 using DMS.Core.Sharing;
 using DMS.Services.Interfaces;
-using Microsoft.EntityFrameworkCore;
 
 namespace DMS.Services.Services
 {
@@ -34,7 +33,7 @@ namespace DMS.Services.Services
             var res = await _uOW.directoryRepository.SoftDeleteDirectoryAsync(id);
 
             return res;
-            
+
         }
 
         public async Task<(List<MyDirectoryDto>, int)> GetAllDirectoriesAsync(DirectoryParams directoryParams)
@@ -98,9 +97,7 @@ namespace DMS.Services.Services
 
         public async Task<bool> UpdateDirectoryNameAsync(int id, string newName)
         {
-            if (!_uOW.directoryRepository.directoryExists(id))
-                throw new Exception("Directory doesn't Exist");
-            
+
             var res = await _uOW.directoryRepository.UpdateDirectoryNameAsync(newName, id);
 
             return res;

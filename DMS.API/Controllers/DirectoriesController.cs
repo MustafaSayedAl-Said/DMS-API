@@ -24,14 +24,14 @@ namespace DMS.API.Controllers
             try
             {
                 var userId = HttpContext.User?.Claims?.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier)?.Value;
-                if(string.IsNullOrEmpty(userId))
+                if (string.IsNullOrEmpty(userId))
                 {
                     return Unauthorized("User is not authenticated");
                 }
                 // Check if the workspace belongs to the user
                 var isOwner = await _directoryService.VerifyWorkspaceOwnershipAsync(directoryParams.WorkspaceId, int.Parse(userId));
 
-                if(!isOwner)
+                if (!isOwner)
                 {
                     return Forbid("User is not authorized to access this workspace");
                 }
@@ -71,8 +71,8 @@ namespace DMS.API.Controllers
                 if (ModelState.IsValid)
                 {
                     var userId = HttpContext.User?.Claims?.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier)?.Value;
-                    
-                    if(string.IsNullOrEmpty(userId))
+
+                    if (string.IsNullOrEmpty(userId))
                     {
                         return Unauthorized("User is not authenticated");
                     }
@@ -114,8 +114,8 @@ namespace DMS.API.Controllers
                     return Unauthorized("User is not authenticated");
                 }
                 var isOwner = await _directoryService.VerifyDirectoryOwnershipAsync(id, int.Parse(userId));
-                
-                if(!isOwner)
+
+                if (!isOwner)
                 {
                     return Forbid("User is not authorized to delete this directory");
                 }

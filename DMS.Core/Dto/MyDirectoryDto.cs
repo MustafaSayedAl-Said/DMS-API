@@ -1,7 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-
-namespace DMS.Core.Dto
+﻿namespace DMS.Core.Dto
 {
     public class MyDirectoryDto
     {

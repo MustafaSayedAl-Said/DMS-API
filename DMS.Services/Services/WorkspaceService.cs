@@ -32,7 +32,7 @@ namespace DMS.Services.Services
         {
             if (!_uOW.workspaceRepository.workspaceExists(id))
             {
-                throw new Exception($"Workspace with id [{id}] not found"); 
+                throw new Exception($"Workspace with id [{id}] not found");
             }
             var userId = _uOW.workspaceRepository.getUserId(id);
             await _uOW.workspaceRepository.DeleteAsync(userId);
@@ -77,7 +77,7 @@ namespace DMS.Services.Services
 
         public async Task<bool> UpdateWorkspaceAsync(WorkspaceDto workspaceDto)
         {
-            if(workspaceDto == null)
+            if (workspaceDto == null)
             {
                 throw new ArgumentNullException(nameof(workspaceDto));
             }

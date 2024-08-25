@@ -19,25 +19,23 @@ namespace DMS.Services.Services
 
         public async Task<(IReadOnlyList<DocumentGetDto>, int)> GetAllDocumentsAsync(DocumentParams documentParams)
         {
-            if (_uOW.directoryRepository.directoryExists(documentParams.DirectoryId))
-            {
-                var (allDocuments, totalItems) = await _uOW.documentRepository.GetAllAsync(documentParams);
-                var documents = _mapper.Map<IReadOnlyList<DocumentGetDto>>(allDocuments);
 
-                if (documents is not null)
+            var (allDocuments, totalItems) = await _uOW.documentRepository.GetAllAsync(documentParams);
+            var documents = _mapper.Map<IReadOnlyList<DocumentGetDto>>(allDocuments);
+
+            if (documents is not null)
+            {
+                var directory = await _uOW.directoryRepository.GetAsync(documentParams.DirectoryId);
+                var userId = _uOW.workspaceRepository.getUserId(directory.WorkspaceId);
+                var User = await _uOW.userRepository.GetAsync(userId);
+                foreach (var document in documents)
                 {
-                    var directory = await _uOW.directoryRepository.GetAsync(documentParams.DirectoryId);
-                    var userId = _uOW.workspaceRepository.getUserId(directory.WorkspaceId);
-                    var User = await _uOW.userRepository.GetAsync(userId);
-                    foreach (var document in documents)
-                    {
-                        document.UserName = User.Email;
-                    }
-                    return (documents, totalItems);
+                    document.OwnerName = User.Email;
                 }
-                throw new Exception("Error while retrieving documents");
+                return (documents, totalItems);
             }
-            throw new Exception("Directory doesn't exist");
+            throw new Exception("Error while retrieving documents");
+
         }
 
         public async Task<DocumentGetDto> GetDocumentByIdAsync(int id)
@@ -46,13 +44,9 @@ namespace DMS.Services.Services
             return _mapper.Map<DocumentGetDto>(document);
         }
 
-        public async Task<bool> AddDocumentAsync(DocumentDto documentDto)
+        public async Task<bool> AddDocumentAsync(DocumentDto documentDto, string name)
         {
-            if (_uOW.directoryRepository.directoryExists(documentDto.DirectoryId))
-            {
-                return await _uOW.documentRepository.AddSync(documentDto);
-            }
-            throw new Exception("Directory doesn't Exist");
+            return await _uOW.documentRepository.AddSync(documentDto, name);
         }
 
         public async Task<bool> UpdateDocumentAsync(DocumentDto documentDto)
@@ -66,14 +60,39 @@ namespace DMS.Services.Services
             throw new Exception($"Document Not Found, Id [{documentDto.Id}] is Incorrect");
         }
 
-        public async Task<bool> DeleteDocumentAsync(int id)
+        public async Task<bool> SoftDeleteDocumentAsync(int id)
         {
-            if (_uOW.documentRepository.documentExists(id))
-            {
-                await _uOW.documentRepository.DeleteAsync(id);
+            
+                var res = await _uOW.documentRepository.SoftDeleteDocumentAsync(id);
                 return true;
-            }
-            throw new Exception($"Document Not Found, Id [{id}] is Incorrect");
+        }
+
+        public async Task<bool> VerifyDirectoryOwnershipAsync(int directoryId, int userId)
+        {
+            if (!_uOW.directoryRepository.directoryExists(directoryId))
+                throw new Exception("Directory doesn't exist");
+
+            var directory = await _uOW.directoryRepository.GetDirectoryWithWorkspaceAsync(directoryId);
+
+            return directory.Workspace.UserId == userId;
+
+        }
+
+        public async Task<bool> VerifyDocumentOwnershipAsync(int id, string email)
+        {
+            if (!_uOW.documentRepository.documentExists(id))
+                throw new Exception("Document doesn't exist");
+
+            var document = await _uOW.documentRepository.GetAsync(id);
+
+            return document.OwnerName == email;
+        }
+
+        public async Task<bool> UpdateDocumentVisibilityAsync(int id)
+        {
+            var res = await _uOW.documentRepository.UpdateDocumentVisibilityAsync(id);
+
+            return res;
         }
     }
 }

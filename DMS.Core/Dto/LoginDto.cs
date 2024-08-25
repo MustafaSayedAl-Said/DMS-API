@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace DMS.Core.Dto
+﻿namespace DMS.Core.Dto
 {
     public class LoginDto
     {

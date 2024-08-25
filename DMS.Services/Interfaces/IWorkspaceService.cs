@@ -1,6 +1,4 @@
 ﻿using DMS.Core.Dto;
-using DMS.Core.Entities;
-using Microsoft.AspNetCore.Http;
 
 namespace DMS.Services.Interfaces
 {

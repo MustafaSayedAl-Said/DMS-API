@@ -3,7 +3,6 @@ using DMS.Core.Interfaces;
 using DMS.Infrastructure.Data;
 using DMS.Infrastructure.Data.Config;
 using DMS.Infrastructure.Repositories;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
@@ -62,7 +61,7 @@ namespace DMS.Infrastructure
 
         public static async void InfrastructureConfigMiddleWare(this IApplicationBuilder app)
         {
-            using(var scope = app.ApplicationServices.CreateScope())
+            using (var scope = app.ApplicationServices.CreateScope())
             {
                 var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
                 await IdentitySeed.SeedUserAsync(userManager);

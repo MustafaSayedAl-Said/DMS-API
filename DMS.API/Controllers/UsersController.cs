@@ -1,7 +1,4 @@
-﻿using AutoMapper;
-using DMS.Core.Dto;
-using DMS.Core.Entities;
-using DMS.Core.Interfaces;
+﻿using DMS.Core.Dto;
 using DMS.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -25,7 +22,7 @@ namespace DMS.API.Controllers
         {
             try
             {
-                if(ModelState.IsValid)
+                if (ModelState.IsValid)
                 {
                     var userDto = await _userService.UserLogin(loginDto);
                     return Ok(userDto);
@@ -59,8 +56,9 @@ namespace DMS.API.Controllers
         [Authorize]
         [HttpGet("test")]
 
-        public ActionResult<string> Test() {
-            return  "hi";
+        public ActionResult<string> Test()
+        {
+            return "hi";
         }
 
 
@@ -97,11 +95,11 @@ namespace DMS.API.Controllers
                 var res = await _userService.GetUserWorkspace(HttpContext);
                 return Ok(res);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return BadRequest(ex.Message);
             }
-            
+
         }
     }
 }

@@ -1,8 +1,4 @@
-﻿using AutoMapper;
-using DMS.API.Errors;
-using DMS.Core.Dto;
-using DMS.Core.Entities;
-using DMS.Core.Interfaces;
+﻿using DMS.Core.Dto;
 using DMS.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -59,7 +55,7 @@ namespace DMS.API.Controllers
                 var workspaceDto = await _workspaceService.GetWorkspaceByUserIdAsync(userId);
                 return Ok(workspaceDto);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return BadRequest(ex.Message);
             }

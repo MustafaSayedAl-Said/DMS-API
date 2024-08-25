@@ -5,6 +5,7 @@ using DMS.Core.Interfaces;
 using DMS.Core.Sharing;
 using DMS.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
+using System.IO;
 
 namespace DMS.Infrastructure.Repositories
 {
@@ -19,7 +20,7 @@ namespace DMS.Infrastructure.Repositories
             _mapper = mapper;
         }
 
-        public async Task<bool> AddSync(DocumentDto dto)
+        public async Task<bool> AddSync(DocumentDto dto, string name)
         {
             if (dto.DocumentContent is not null)
             {
@@ -44,6 +45,8 @@ namespace DMS.Infrastructure.Repositories
                 var documentMap = _mapper.Map<Document>(dto);
                 documentMap.Name = dto.DocumentContent.FileName;
                 documentMap.DocumentContent = src; // Relative path, as stored in the database
+                documentMap.OwnerName = name;
+                documentMap.ModifyDate = DateTime.Now.Date;
                 await _context.Documents.AddAsync(documentMap);
                 await _context.SaveChangesAsync();
                 return true;
@@ -56,7 +59,7 @@ namespace DMS.Infrastructure.Repositories
             List<Document> query;
 
             //search by directoryId
-            query = await _context.Documents.AsNoTracking().Where(d => d.DirectoryId == documentParams.DirectoryId).ToListAsync();
+            query = await _context.Documents.AsNoTracking().Where(d => d.DirectoryId == documentParams.DirectoryId && d.IsDeleted == false).ToListAsync();
             //if (documentParams.DirectoryId.HasValue)
             //{
 
@@ -131,6 +134,40 @@ namespace DMS.Infrastructure.Repositories
                 return true;
             }
             return false;
+        }
+
+        public async Task<bool> SoftDeleteDocumentAsync(int id)
+        {
+            var document = await _context.Documents.FirstOrDefaultAsync(d => d.Id == id);
+
+            if (document == null)
+            {
+                throw new Exception("Something Went Wrong");
+            }
+
+            document.IsDeleted = true;
+
+            _context.Documents.Update(document);
+
+            await _context.SaveChangesAsync();
+
+            return true;
+        }
+
+        public async Task<bool> UpdateDocumentVisibilityAsync(int id)
+        {
+            var document = await _context.Documents.FirstOrDefaultAsync(d => d.Id == id);
+
+            if (document == null)
+            {
+                throw new Exception("Something went wrong");
+            }
+
+            document.IsPublic = true;
+            _context.Documents.Update(document);
+            await _context.SaveChangesAsync();
+
+            return true;
         }
     }
 }

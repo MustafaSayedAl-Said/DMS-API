@@ -18,7 +18,7 @@ namespace DMS.Core.Entities
 
         public DateTime ModifyDate { get; set; }
 
-        public bool IsPublic { get; set; }
+        public bool IsPublic { get; set; } = false;
 
         public bool IsDeleted { get; set; } = false;
 

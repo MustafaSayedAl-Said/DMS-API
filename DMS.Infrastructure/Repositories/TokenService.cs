@@ -2,13 +2,9 @@
 using DMS.Core.Interfaces;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
-using System;
-using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
 using System.Security.Claims;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace DMS.Infrastructure.Repositories
 {
@@ -36,8 +32,8 @@ namespace DMS.Infrastructure.Repositories
             {
                 Subject = new ClaimsIdentity(claims),
                 Expires = DateTime.Now.AddDays(10),
-                Issuer = _config[key:"Token:Issuer"],
-                Audience = _config[key:"Token:Audience"],
+                Issuer = _config[key: "Token:Issuer"],
+                Audience = _config[key: "Token:Audience"],
                 SigningCredentials = creds,
             };
 

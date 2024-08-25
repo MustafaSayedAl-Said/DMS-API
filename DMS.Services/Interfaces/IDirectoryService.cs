@@ -1,7 +1,5 @@
-﻿using Azure;
-using DMS.Core.Dto;
+﻿using DMS.Core.Dto;
 using DMS.Core.Sharing;
-using Microsoft.AspNetCore.JsonPatch;
 
 namespace DMS.Services.Interfaces
 {
