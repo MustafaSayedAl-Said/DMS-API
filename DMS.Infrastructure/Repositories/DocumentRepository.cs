@@ -169,5 +169,35 @@ namespace DMS.Infrastructure.Repositories
 
             return true;
         }
+
+        public async Task<(IEnumerable<Document>, int)> GetAllPublicAsync(DocumentParams documentParams)
+        {
+            List<Document> query;
+
+            // Get all that have isPublic condition set to 1
+            query = await _context.Documents.AsNoTracking().Where(d => d.IsPublic == true && d.IsDeleted == false).ToListAsync();
+
+            //search by name
+            if (!string.IsNullOrEmpty(documentParams.Search))
+                query = query.Where(x => x.Name.ToLower().Contains(documentParams.Search.ToLower())).ToList();
+
+            int totalCount = query.Count();
+
+            //sorting
+            if (!string.IsNullOrEmpty(documentParams.Sort))
+            {
+                query = documentParams.Sort switch
+                {
+                    "NameAsc" => query.OrderBy(x => x.Name).ToList(),
+                    "NameDesc" => query.OrderByDescending(x => x.Name).ToList(),
+                    _ => query.OrderBy(x => x.Name).ToList(),
+                };
+            }
+
+            //paging
+            query = query.Skip((documentParams.PageSize) * (documentParams.PageNumber - 1)).Take(documentParams.PageSize).ToList();
+
+            return (query, totalCount);
+        }
     }
 }

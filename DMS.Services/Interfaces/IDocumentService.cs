@@ -7,6 +7,8 @@ namespace DMS.Services.Interfaces
     {
         public Task<(IReadOnlyList<DocumentGetDto>, int)> GetAllDocumentsAsync(DocumentParams documentParams);
 
+        public Task<(List<DocumentGetDto>, int)> GetAllPublicDocumentsAsync(DocumentParams documentParams);
+
         public Task<DocumentGetDto> GetDocumentByIdAsync(int id);
 
         public Task<bool> AddDocumentAsync(DocumentDto documentDto, string name);

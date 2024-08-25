@@ -25,13 +25,6 @@ namespace DMS.Services.Services
 
             if (documents is not null)
             {
-                var directory = await _uOW.directoryRepository.GetAsync(documentParams.DirectoryId);
-                var userId = _uOW.workspaceRepository.getUserId(directory.WorkspaceId);
-                var User = await _uOW.userRepository.GetAsync(userId);
-                foreach (var document in documents)
-                {
-                    document.OwnerName = User.Email;
-                }
                 return (documents, totalItems);
             }
             throw new Exception("Error while retrieving documents");
@@ -93,6 +86,18 @@ namespace DMS.Services.Services
             var res = await _uOW.documentRepository.UpdateDocumentVisibilityAsync(id);
 
             return res;
+        }
+
+        public async Task<(List<DocumentGetDto>, int)> GetAllPublicDocumentsAsync(DocumentParams documentParams)
+        {
+            var (allDocuments, totalItems) = await _uOW.documentRepository.GetAllPublicAsync(documentParams);
+            var documents = _mapper.Map<List<DocumentGetDto>>(allDocuments);
+            if (documents is not null)
+            { 
+                return (documents, totalItems);
+            }
+            throw new Exception("Error while retrieving documents");
+
         }
     }
 }

@@ -47,6 +47,21 @@ namespace DMS.API.Controllers
 
         }
 
+        [HttpGet("public")]
+        
+        public async Task<IActionResult> GetPublic([FromQuery] DocumentParams documentParams)
+        {
+            try
+            {
+                var (documents, totalItems) = await _documentService.GetAllPublicDocumentsAsync(documentParams);
+                return Ok(new Pagination<DocumentGetDto>(totalItems, documentParams.PageSize, documentParams.PageNumber, documents));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
         [HttpGet("{id}")]
 
         public async Task<IActionResult> Get(int id)

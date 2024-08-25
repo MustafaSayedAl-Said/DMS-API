@@ -8,6 +8,8 @@ namespace DMS.Core.Interfaces
     {
         public Task<(IEnumerable<Document>, int TotalCount)> GetAllAsync(DocumentParams documentParams);
 
+        public Task<(IEnumerable<Document>, int)> GetAllPublicAsync(DocumentParams documentParams);
+
         public bool documentExists(int id);
 
         //public Task<ICollection<Document>> GetDocumentsInDirectory(int directoryId);
