@@ -12,7 +12,7 @@ namespace DMS.Core.Dto
         [MinLength(3, ErrorMessage = "Min Length is 3 characters")]
         public string DisplayName { get; set; }
 
-        public string Paswword { get; set; }
+        public string Password { get; set; }
 
         [Required]
         public string WorkspaceName { get; set; }

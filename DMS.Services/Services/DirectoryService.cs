@@ -102,5 +102,15 @@ namespace DMS.Services.Services
 
             return res;
         }
+
+        public async Task<(List<MyDirectoryDto>, int)> GetAllDirectoriesByUserIdAsync(int userId, DirectoryParams directoryParams)
+        {
+            var workspace = await _uOW.workspaceRepository.getWorkspaceByUserId(userId);
+
+            directoryParams.WorkspaceId = workspace.Id;
+
+            return await GetAllDirectoriesAsync(directoryParams);
+
+        }
     }
 }

@@ -7,6 +7,8 @@ namespace DMS.Services.Interfaces
     {
         Task<(List<MyDirectoryDto>, int)> GetAllDirectoriesAsync(DirectoryParams directoryParams);
 
+        Task<(List<MyDirectoryDto>,int)> GetAllDirectoriesByUserIdAsync(int userId, DirectoryParams directoryParams);
+
         Task<MyDirectoryDto> GetDirectoryByIdAsync(int id);
 
         Task<bool> AddDirectoryAsync(MyDirectoryDto directoryDto);

@@ -171,5 +171,27 @@ namespace DMS.API.Controllers
             }
         }
 
+        [HttpGet("user")]
+
+        public async Task<IActionResult> GetWithoutWorkspaceId([FromQuery] DirectoryParams directoryParams)
+        {
+            try
+            {
+                var userId = HttpContext.User?.Claims?.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Unauthorized("User is not authenticated");
+                }
+
+                var (directories, totalItems) = await _directoryService.GetAllDirectoriesByUserIdAsync(int.Parse(userId), directoryParams);
+                return Ok(new Pagination<MyDirectoryDto>(totalItems, directoryParams.PageSize, directoryParams.PageNumber, directories));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+
+        }
+
     }
 }

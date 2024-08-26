@@ -66,7 +66,7 @@ namespace DMS.Services.Services
                     Name = registerDto.WorkspaceName,
                 }
             };
-            var result = await _userManager.CreateAsync(user, registerDto.Paswword);
+            var result = await _userManager.CreateAsync(user, registerDto.Password);
             if (result.Succeeded == false)
             {
                 var errors = result.Errors.Select(e => e.Description).ToArray();
