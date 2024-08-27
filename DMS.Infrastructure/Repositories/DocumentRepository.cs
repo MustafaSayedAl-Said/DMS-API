@@ -163,7 +163,7 @@ namespace DMS.Infrastructure.Repositories
                 throw new Exception("Something went wrong");
             }
 
-            document.IsPublic = true;
+            document.IsPublic = !document.IsPublic;
             _context.Documents.Update(document);
             await _context.SaveChangesAsync();
 

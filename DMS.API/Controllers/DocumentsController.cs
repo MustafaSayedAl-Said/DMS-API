@@ -4,6 +4,7 @@ using DMS.Core.Sharing;
 using DMS.Services.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 
 namespace DMS.API.Controllers
@@ -150,14 +151,14 @@ namespace DMS.API.Controllers
             }
         }
 
-        [HttpPatch("id")]
+        [HttpPatch("{id}")]
 
         public async Task<ActionResult> Patch(int id)
         {
             try
             {
                 var userId = HttpContext.User?.Claims?.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier)?.Value;
-                var email = HttpContext.User?.Claims?.FirstOrDefault(x => x.Type == ClaimTypes.Email).Value;
+                var email = HttpContext.User?.Claims?.FirstOrDefault(x => x.Type == ClaimTypes.Email)?.Value;
 
                 if (string.IsNullOrEmpty(userId))
                 {
