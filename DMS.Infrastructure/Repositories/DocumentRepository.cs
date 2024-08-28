@@ -82,7 +82,9 @@ namespace DMS.Infrastructure.Repositories
                 {
                     "NameAsc" => query.OrderBy(x => x.Name).ToList(),
                     "NameDesc" => query.OrderByDescending(x => x.Name).ToList(),
-                    _ => query.OrderBy(x => x.Name).ToList(),
+                    "DateAsc" => query.OrderBy(x => x.ModifyDate).ToList(),
+                    "DateDesc" => query.OrderByDescending(x => x.ModifyDate).ToList(),
+                    _ => query.ToList(),
                 };
             }
 
@@ -190,7 +192,9 @@ namespace DMS.Infrastructure.Repositories
                 {
                     "NameAsc" => query.OrderBy(x => x.Name).ToList(),
                     "NameDesc" => query.OrderByDescending(x => x.Name).ToList(),
-                    _ => query.OrderBy(x => x.Name).ToList(),
+                    "DateAsc" => query.OrderBy(x => x.ModifyDate).ToList(),
+                    "DateDesc" => query.OrderByDescending(x => x.ModifyDate).ToList(),
+                    _ => query.ToList(),
                 };
             }
 
