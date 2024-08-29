@@ -8,8 +8,6 @@ namespace DMS.Core.Dto
     {
         public int Id { get; set; }
 
-        [Required]
-        [ForeignKey("MyDirectory")]
         public int DirectoryId { get; set; }
 
         public IFormFile DocumentContent { get; set; }

@@ -32,7 +32,7 @@ namespace DMS.API.Controllers
                     return Unauthorized("User is not authenticated");
                 }
 
-                // Check if the workspace belongs to the user
+                // Check if the directory belongs to the user
                 var isOwner = await _documentService.VerifyDirectoryOwnershipAsync(documentParams.DirectoryId, int.Parse(userId));
                 if (!isOwner)
                 {
