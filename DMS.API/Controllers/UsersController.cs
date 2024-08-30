@@ -1,4 +1,5 @@
-﻿using DMS.Core.Dto;
+﻿using DMS.API.Errors;
+using DMS.Core.Dto;
 using DMS.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -27,11 +28,11 @@ namespace DMS.API.Controllers
                     var userDto = await _userService.UserLogin(loginDto);
                     return Ok(userDto);
                 }
-                return BadRequest("Something went Wrong");
+                return BadRequest(new BaseCommonResponse(500));
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return BadRequest(new BaseCommonResponse(401, ex.Message));
             }
         }
 
