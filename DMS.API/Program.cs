@@ -61,4 +61,4 @@ app.MapControllers();
 
 InfrastructureRegistration.InfrastructureConfigMiddleWare(app);
 
-app.Run();
+await app.RunAsync();

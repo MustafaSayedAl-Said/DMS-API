@@ -2,6 +2,7 @@
 using DMS.Core.Dto;
 using DMS.Core.Sharing;
 using DMS.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
@@ -18,6 +19,7 @@ namespace DMS.API.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = "Admin")]
 
         public async Task<IActionResult> Get([FromQuery] DirectoryParams directoryParams)
         {
@@ -27,13 +29,6 @@ namespace DMS.API.Controllers
                 if (string.IsNullOrEmpty(userId))
                 {
                     return Unauthorized("User is not authenticated");
-                }
-                // Check if the workspace belongs to the user
-                var isOwner = await _directoryService.VerifyWorkspaceOwnershipAsync(directoryParams.WorkspaceId, int.Parse(userId));
-
-                if (!isOwner)
-                {
-                    return Forbid("User is not authorized to access this workspace");
                 }
 
                 var (directories, totalItems) = await _directoryService.GetAllDirectoriesAsync(directoryParams);

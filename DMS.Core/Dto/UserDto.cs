@@ -11,4 +11,17 @@
         public int Id { get; set; }
 
     }
+
+    public class UserGetDto
+    {
+        public string Email { get; set; }
+
+        public string DisplayName { get; set; }
+
+        public int id { get; set; }
+
+        public string WorkspaceName { get; set; }
+
+        public int WorkspaceId { get; set; }
+    }
 }

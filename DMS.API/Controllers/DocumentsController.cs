@@ -2,9 +2,7 @@
 using DMS.Core.Dto;
 using DMS.Core.Sharing;
 using DMS.Services.Interfaces;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 
 namespace DMS.API.Controllers
@@ -32,12 +30,20 @@ namespace DMS.API.Controllers
                     return Unauthorized("User is not authenticated");
                 }
 
-                // Check if the directory belongs to the user
-                var isOwner = await _documentService.VerifyDirectoryOwnershipAsync(documentParams.DirectoryId, int.Parse(userId));
-                if (!isOwner)
+                // Check if the user has the "Admin" role from the token
+                var isAdmin = HttpContext.User.IsInRole("Admin");
+
+                if(!isAdmin)
                 {
-                    return Forbid("User is not authorized to access this directory");
+                    // Check if the directory belongs to the user
+                    var isOwner = await _documentService.VerifyDirectoryOwnershipAsync(documentParams.DirectoryId, int.Parse(userId));
+                    if (!isOwner)
+                    {
+                        return Forbid("User is not authorized to access this directory");
+                    }
                 }
+
+                
                 var (documents, totalItems) = await _documentService.GetAllDocumentsAsync(documentParams);
                 return Ok(new Pagination<DocumentGetDto>(totalItems, documentParams.PageSize, documentParams.PageNumber, documents));
             }
@@ -49,7 +55,7 @@ namespace DMS.API.Controllers
         }
 
         [HttpGet("public")]
-        
+
         public async Task<IActionResult> GetPublic([FromQuery] DocumentParams documentParams)
         {
             try
@@ -141,7 +147,7 @@ namespace DMS.API.Controllers
 
                 var result = await _documentService.SoftDeleteDocumentAsync(id);
 
-                if (result) 
+                if (result)
                     return Ok("Document was soft deleted successfully");
                 return BadRequest("Error occurred while deleting the document");
             }

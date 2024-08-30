@@ -6,6 +6,7 @@ using DMS.Services.Extensions;
 using DMS.Services.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace DMS.Services.Services
 {
@@ -43,7 +44,7 @@ namespace DMS.Services.Services
             {
                 DisplayName = user.DisplayName,
                 Email = loginDto.Email,
-                Token = _tokenService.CreateToken(user),
+                Token = await _tokenService.CreateToken(user),
                 Id = user.Id
             };
         }
@@ -82,7 +83,7 @@ namespace DMS.Services.Services
             {
                 DisplayName = registerDto.DisplayName,
                 Email = registerDto.Email,
-                Token = _tokenService.CreateToken(CreatedUser),
+                Token = await _tokenService.CreateToken(CreatedUser),
                 Id = CreatedUser.Id
             };
         }
@@ -107,7 +108,7 @@ namespace DMS.Services.Services
             {
                 DisplayName = user.DisplayName,
                 Email = user.Email,
-                Token = _tokenService.CreateToken(user),
+                Token = await _tokenService.CreateToken(user),
                 Id = user.Id
             };
         }
@@ -134,6 +135,15 @@ namespace DMS.Services.Services
 
             return _result;
 
+        }
+
+        public async Task<List<UserGetDto>> GetAllUsersAsync()
+        {
+            var users = await _userManager.Users.Include(u => u.Workspace).ToListAsync();
+
+            var userDtos = _mapper.Map<List<UserGetDto>>(users);
+
+            return userDtos;
         }
     }
 }

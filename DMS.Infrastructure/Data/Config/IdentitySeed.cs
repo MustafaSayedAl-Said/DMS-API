@@ -29,6 +29,34 @@ namespace DMS.Infrastructure.Data.Config
                     }
                 }
             }
+            string email = "admin@admin.com";
+            string password = "P@$$w0rd1";
+
+            if (await userManager.FindByEmailAsync(email) == null)
+            {
+                var adminUser = new User
+                {
+                    DisplayName = "Admin",
+                    Email = email,
+                    UserName = email,
+                    Workspace = new Workspace
+                    {
+                        Name = "AdminWorkspace",
+                    }
+                };
+                await userManager.CreateAsync(adminUser, password);
+                await userManager.AddToRoleAsync(adminUser, "Admin");
+            }
+        }
+
+        public static async Task SeedUserRolesAsync(RoleManager<IdentityRole<int>> roleManager)
+        {
+            var roles = new[] { "Admin", "Member" };
+            foreach (var role in roles)
+            {
+                if (!await roleManager.RoleExistsAsync(role))
+                    await roleManager.CreateAsync(new IdentityRole<int> { Name = role });
+            }
         }
     }
 }

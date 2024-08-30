@@ -55,9 +55,9 @@ namespace DMS.Services.Services
 
         public async Task<bool> SoftDeleteDocumentAsync(int id)
         {
-            
-                var res = await _uOW.documentRepository.SoftDeleteDocumentAsync(id);
-                return true;
+
+            var res = await _uOW.documentRepository.SoftDeleteDocumentAsync(id);
+            return true;
         }
 
         public async Task<bool> VerifyDirectoryOwnershipAsync(int directoryId, int userId)
@@ -93,7 +93,7 @@ namespace DMS.Services.Services
             var (allDocuments, totalItems) = await _uOW.documentRepository.GetAllPublicAsync(documentParams);
             var documents = _mapper.Map<List<DocumentGetDto>>(allDocuments);
             if (documents is not null)
-            { 
+            {
                 return (documents, totalItems);
             }
             throw new Exception("Error while retrieving documents");

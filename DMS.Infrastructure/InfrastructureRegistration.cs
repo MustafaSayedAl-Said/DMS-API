@@ -34,6 +34,7 @@ namespace DMS.Infrastructure
             });
 
             services.AddIdentity<User, IdentityRole<int>>()
+                .AddRoles<IdentityRole<int>>()
                 .AddEntityFrameworkStores<DataContext>()
                 .AddDefaultTokenProviders();
             services.AddMemoryCache();
@@ -63,8 +64,10 @@ namespace DMS.Infrastructure
         {
             using (var scope = app.ApplicationServices.CreateScope())
             {
+                var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole<int>>>();
                 var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
                 await IdentitySeed.SeedUserAsync(userManager);
+                await IdentitySeed.SeedUserRolesAsync(roleManager);
             }
         }
     }

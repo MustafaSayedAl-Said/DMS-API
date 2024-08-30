@@ -24,7 +24,7 @@ namespace DMS.Infrastructure.Repositories
             List<MyDirectory> query;
 
             //search by WorkspaceId
-            query = await _context.Directories.AsNoTracking().Where(d => d.WorkspaceId == directoryParams.WorkspaceId && d.IsDeleted == false).ToListAsync();
+            query = await _context.Directories.AsNoTracking().Where(d => d.WorkspaceId == directoryParams.WorkspaceId && d.IsDeleted == false).AsNoTracking().ToListAsync();
             //if (directoryParams.WorkspaceId.HasValue)
             //{
 

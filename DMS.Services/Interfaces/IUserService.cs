@@ -14,5 +14,7 @@ namespace DMS.Services.Interfaces
         public Task<bool> CheckEmailExistance(string email);
 
         public Task<WorkspaceDto> GetUserWorkspace(HttpContext httpContext);
+
+        public Task<List<UserGetDto>> GetAllUsersAsync();
     }
 }
