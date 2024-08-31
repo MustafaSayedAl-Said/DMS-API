@@ -3,6 +3,7 @@ using DMS.Core.Dto;
 using DMS.Core.Sharing;
 using DMS.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.StaticFiles;
 using System.Security.Claims;
 
 namespace DMS.API.Controllers
@@ -208,6 +209,53 @@ namespace DMS.API.Controllers
             catch (Exception ex)
             {
                 return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet("download/{id}")]
+
+        public async Task<IActionResult> DownloadFile(int id)
+        {
+            try
+            {
+                var documentDto = await _documentService.GetDocumentByIdAsync(id);
+
+                if (documentDto == null)
+                {
+                    return NotFound("Document not found");
+                }
+
+                if (!documentDto.IsPublic)
+                {
+                    var userId = HttpContext.User?.Claims?.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier)?.Value;
+                    var email = HttpContext.User?.Claims?.FirstOrDefault(x => x.Type == ClaimTypes.Email)?.Value;
+                    // Check if the user has the "Admin" role from the token
+                    var isAdmin = HttpContext.User.IsInRole("Admin");
+
+                    if (!isAdmin)
+                    {
+                        var isOwner = await _documentService.VerifyDocumentOwnershipAsync(id, email);
+
+                        if (!isOwner)
+                        {
+                            return Forbid("User is not authorized to download this document");
+                        }
+                    }
+                }
+                var path = documentDto.DocumentContent;
+
+
+                var net = new System.Net.WebClient();
+                var data = net.DownloadData(path);
+                var content = new System.IO.MemoryStream(data);
+                var contentType = "APPLICATION/octet-stream";
+                var fileName = documentDto.Name;
+
+                return File(content, contentType, fileName);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Error downloading file: {ex.Message}");
             }
         }
     }
