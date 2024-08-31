@@ -72,14 +72,18 @@ namespace DMS.API.Controllers
                         return Unauthorized("User is not authenticated");
                     }
 
-                    // Verify if the workspace belongs to the user
-                    var isOwner = await _directoryService.VerifyWorkspaceOwnershipAsync(directoryDto.WorkspaceId, int.Parse(userId));
-
-                    if (!isOwner)
+                    // Check if the user has the "Admin" role from the token
+                    var isAdmin = HttpContext.User.IsInRole("Admin");
+                    if (!isAdmin)
                     {
-                        return Forbid("User is not authorized to access this workspace");
-                    }
+                        // Verify if the workspace belongs to the user
+                        var isOwner = await _directoryService.VerifyWorkspaceOwnershipAsync(directoryDto.WorkspaceId, int.Parse(userId));
 
+                        if (!isOwner)
+                        {
+                            return Forbid("User is not authorized to access this workspace");
+                        }
+                    }
                     var result = await _directoryService.AddDirectoryAsync(directoryDto);
                     if (result)
                         return Ok(directoryDto);
@@ -108,11 +112,18 @@ namespace DMS.API.Controllers
                 {
                     return Unauthorized("User is not authenticated");
                 }
-                var isOwner = await _directoryService.VerifyDirectoryOwnershipAsync(id, int.Parse(userId));
 
-                if (!isOwner)
+                // Check if the user has the "Admin" role from the token
+                var isAdmin = HttpContext.User.IsInRole("Admin");
+                if (!isAdmin)
                 {
-                    return Forbid("User is not authorized to delete this directory");
+                    var isOwner = await _directoryService.VerifyDirectoryOwnershipAsync(id, int.Parse(userId));
+
+                    if (!isOwner)
+                    {
+                        return Forbid("User is not authorized to delete this directory");
+                    }
+
                 }
 
                 var result = await _directoryService.SoftDeleteDirectoryAsync(id);
@@ -145,11 +156,16 @@ namespace DMS.API.Controllers
                     return Unauthorized("User is not authenticated or user ID is invalid");
                 }
 
-                var isOwner = await _directoryService.VerifyDirectoryOwnershipAsync(id, int.Parse(userId));
-
-                if (!isOwner)
+                // Check if the user has the "Admin" role from the token
+                var isAdmin = HttpContext.User.IsInRole("Admin");
+                if (!isAdmin)
                 {
-                    return Forbid("User is not authorized to modify this directory");
+                    var isOwner = await _directoryService.VerifyDirectoryOwnershipAsync(id, int.Parse(userId));
+
+                    if (!isOwner)
+                    {
+                        return Forbid("User is not authorized to modify this directory");
+                    }
                 }
 
                 var result = await _directoryService.UpdateDirectoryNameAsync(id, newName);

@@ -16,6 +16,8 @@ namespace DMS.Services.Interfaces
 
         public Task<WorkspaceDto> GetUserWorkspace(HttpContext httpContext);
 
-        public Task<(List<UserGetDto>, int)> GetAllUsersAsync(UserParams userParams);
+        public Task<(List<UserGetDto>, int)> GetAllUsersAsync(UserParams userParams, int currentUserId);
+
+        public Task<bool> ToggleUserLock(int userId);
     }
 }

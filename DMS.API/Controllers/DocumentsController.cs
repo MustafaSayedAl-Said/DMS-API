@@ -104,12 +104,17 @@ namespace DMS.API.Controllers
                         return Unauthorized("User is not authenticated");
                     }
 
-                    var isOwner = await _documentService.VerifyDirectoryOwnershipAsync(documentDto.DirectoryId, int.Parse(userId));
-                    if (!isOwner)
-                    {
-                        return Forbid("User is not authorized to access this directory");
-                    }
+                    // Check if the user has the "Admin" role from the token
+                    var isAdmin = HttpContext.User.IsInRole("Admin");
 
+                    if (!isAdmin)
+                    {
+                        var isOwner = await _documentService.VerifyDirectoryOwnershipAsync(documentDto.DirectoryId, int.Parse(userId));
+                        if (!isOwner)
+                        {
+                            return Forbid("User is not authorized to access this directory");
+                        }
+                    }
                     var result = await _documentService.AddDocumentAsync(documentDto, email);
                     if (result)
                         return Ok(documentDto);
@@ -138,13 +143,20 @@ namespace DMS.API.Controllers
                 {
                     return Unauthorized("User is not authenticated");
                 }
-                var isOwner = await _documentService.VerifyDocumentOwnershipAsync(id, email);
 
-                if (!isOwner)
+                // Check if the user has the "Admin" role from the token
+                var isAdmin = HttpContext.User.IsInRole("Admin");
+
+                if (!isAdmin)
                 {
-                    return Forbid("User is not authorized to access this directory");
-                }
+                    var isOwner = await _documentService.VerifyDocumentOwnershipAsync(id, email);
 
+                    if (!isOwner)
+                    {
+                        return Forbid("User is not authorized to access this directory");
+                    }
+                }
+                    
                 var result = await _documentService.SoftDeleteDocumentAsync(id);
 
                 if (result)
@@ -171,11 +183,17 @@ namespace DMS.API.Controllers
                     return Unauthorized("User is not authenticated or user ID is invalid");
                 }
 
-                var isOwner = await _documentService.VerifyDocumentOwnershipAsync(id, email);
+                // Check if the user has the "Admin" role from the token
+                var isAdmin = HttpContext.User.IsInRole("Admin");
 
-                if (!isOwner)
+                if (!isAdmin)
                 {
-                    return Forbid("User is not authorized to modify this document");
+                    var isOwner = await _documentService.VerifyDocumentOwnershipAsync(id, email);
+
+                    if (!isOwner)
+                    {
+                        return Forbid("User is not authorized to modify this document");
+                    }
                 }
 
                 var result = await _documentService.UpdateDocumentVisibilityAsync(id);

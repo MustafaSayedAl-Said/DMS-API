@@ -6,6 +6,8 @@ namespace DMS.Core.Entities
     {
         public string DisplayName { get; set; }
 
+        public bool isLocked { get; set; } = false;
+
         public virtual Workspace Workspace { get; set; }
     }
 }

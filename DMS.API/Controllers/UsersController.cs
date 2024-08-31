@@ -5,6 +5,7 @@ using DMS.Core.Sharing;
 using DMS.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace DMS.API.Controllers
 {
@@ -34,7 +35,7 @@ namespace DMS.API.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new BaseCommonResponse(401, ex.Message));
+                return BadRequest(ex.Message);
             }
         }
 
@@ -110,8 +111,38 @@ namespace DMS.API.Controllers
         {
             try
             {
-                var (users, totalItems) = await _userService.GetAllUsersAsync(userParams);
+                var userId = HttpContext.User?.Claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Unauthorized("User is not authenticated");
+                }
+                int currentUserId = int.Parse(userId);
+                var (users, totalItems) = await _userService.GetAllUsersAsync(userParams, currentUserId);
                 return Ok(new Pagination<UserGetDto>(totalItems, userParams.PageSize, userParams.PageNumber, users));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpPatch("{userId}")]
+        public async Task<IActionResult> ToggleUserLock(int userId)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(userId.ToString()))
+                {
+                    return BadRequest("Must input a user Id");
+                }
+
+                var result = await _userService.ToggleUserLock(userId);
+                if (!result)
+                {
+                    return BadRequest("Error occurred while locking user account");
+                }
+                return Ok("User lock was toggled successfully");
             }
             catch (Exception ex)
             {

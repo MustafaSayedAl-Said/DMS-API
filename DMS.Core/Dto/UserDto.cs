@@ -25,5 +25,7 @@
         public string WorkspaceName { get; set; }
 
         public int WorkspaceId { get; set; }
+
+        public bool isLocked { get; set; }
     }
 }

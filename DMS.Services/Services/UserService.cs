@@ -36,6 +36,11 @@ namespace DMS.Services.Services
             if (user is null)
                 throw new Exception("Email Doesn't exist");
 
+            if (user.isLocked)
+            {
+                throw new Exception("Your account is locked. Please contact website admin.");
+            }
+
             var result = await _signInManager.CheckPasswordSignInAsync(user, loginDto.Password, false);
 
             if (!result.Succeeded)
@@ -144,13 +149,16 @@ namespace DMS.Services.Services
 
         }
 
-        public async Task<(List<UserGetDto>, int)> GetAllUsersAsync(UserParams userParams)
+        public async Task<(List<UserGetDto>, int)> GetAllUsersAsync(UserParams userParams, int currentUserId)
         {
 
-            var users = await _userManager.Users.Include(u => u.Workspace).ToListAsync();
+            var users = await _userManager.Users.Include(u => u.Workspace).Where(u => u.Id != currentUserId).ToListAsync();
+
+            if (users == null || users.Count == 0)
+                throw new Exception("Users not found");
 
             if(!string.IsNullOrEmpty(userParams.Search))
-                users = users.Where(x => x.Email.ToLower().Contains(userParams.Search.ToLower())).ToList();
+                users = users.Where(x => x.Email!.ToLower().Contains(userParams.Search.ToLower())).ToList();
 
             int totalCount = users.Count();
 
@@ -171,6 +179,25 @@ namespace DMS.Services.Services
             var userDtos = _mapper.Map<List<UserGetDto>>(users);
 
             return (userDtos, totalCount);
+        }
+
+        public async Task<bool> ToggleUserLock(int userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId.ToString());
+
+            if (user == null)
+                throw new Exception("User Id doesn't exist");
+
+            user.isLocked = !user.isLocked;
+
+            var res =  await _userManager.UpdateAsync(user);
+
+            if (res.Succeeded) { 
+                return true;
+            }
+
+            return false;
+
         }
     }
 }
