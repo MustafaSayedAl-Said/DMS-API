@@ -2,6 +2,7 @@
 using DMS.Core.Dto;
 using DMS.Core.Entities;
 using DMS.Core.Interfaces;
+using DMS.Core.Sharing;
 using DMS.Services.Extensions;
 using DMS.Services.Interfaces;
 using Microsoft.AspNetCore.Http;
@@ -40,12 +41,15 @@ namespace DMS.Services.Services
             if (!result.Succeeded)
                 throw new Exception("Password is wrong");
 
+            var isAdminCheck = await _userManager.IsInRoleAsync(user, "Admin");
+
             return new UserDto
             {
                 DisplayName = user.DisplayName,
                 Email = loginDto.Email,
                 Token = await _tokenService.CreateToken(user),
-                Id = user.Id
+                Id = user.Id,
+                isAdmin = isAdminCheck,
             };
         }
 
@@ -104,12 +108,15 @@ namespace DMS.Services.Services
                 throw new Exception("User not found");
             }
 
+            var isAdminCheck = await _userManager.IsInRoleAsync(user, "Admin");
+
             return new UserDto
             {
                 DisplayName = user.DisplayName,
                 Email = user.Email,
                 Token = await _tokenService.CreateToken(user),
-                Id = user.Id
+                Id = user.Id,
+                isAdmin = isAdminCheck,
             };
         }
 
@@ -137,13 +144,33 @@ namespace DMS.Services.Services
 
         }
 
-        public async Task<List<UserGetDto>> GetAllUsersAsync()
+        public async Task<(List<UserGetDto>, int)> GetAllUsersAsync(UserParams userParams)
         {
+
             var users = await _userManager.Users.Include(u => u.Workspace).ToListAsync();
 
+            if(!string.IsNullOrEmpty(userParams.Search))
+                users = users.Where(x => x.Email.ToLower().Contains(userParams.Search.ToLower())).ToList();
+
+            int totalCount = users.Count();
+
+            if (!string.IsNullOrEmpty(userParams.Sort))
+            {
+                users = userParams.Sort switch
+                {
+                    "NameAsc" => users.OrderBy(x => x.UserName).ToList(),
+                    "NameDesc" => users.OrderByDescending(x => x.UserName).ToList(),
+                    "EmailAsc" => users.OrderBy(x => x.Email).ToList(),
+                    "EmailDesc" => users.OrderByDescending(x => x.Email).ToList(),
+                    "WorkspaceAsc" => users.OrderBy(x => x.Workspace.Name).ToList(),
+                    "WorkspaceDesc" => users.OrderByDescending(x => x.Workspace.Name).ToList(),
+                    _ => users.ToList()
+                };
+            }
+            users = users.Skip((userParams.PageSize) * (userParams.PageNumber - 1)).Take(userParams.PageSize).ToList();
             var userDtos = _mapper.Map<List<UserGetDto>>(users);
 
-            return userDtos;
+            return (userDtos, totalCount);
         }
     }
 }

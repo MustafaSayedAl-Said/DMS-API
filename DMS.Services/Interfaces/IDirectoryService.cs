@@ -23,5 +23,7 @@ namespace DMS.Services.Interfaces
 
         public Task<bool> UpdateDirectoryNameAsync(int id, string newName);
 
+        public Task<WorkspaceDto> GetWorkspaceByDirectoryId(int id);
+
     }
 }

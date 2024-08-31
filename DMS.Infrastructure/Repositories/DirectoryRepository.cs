@@ -1,4 +1,5 @@
-﻿using DMS.Core.Entities;
+﻿using DMS.Core.Dto;
+using DMS.Core.Entities;
 using DMS.Core.Interfaces;
 using DMS.Core.Sharing;
 using DMS.Infrastructure.Data;
@@ -47,7 +48,7 @@ namespace DMS.Infrastructure.Repositories
                 {
                     "NameAsc" => query.OrderBy(x => x.Name).ToList(),
                     "NameDesc" => query.OrderByDescending(x => x.Name).ToList(),
-                    _ => query.OrderBy(x => x.Name).ToList(),
+                    _ => query.ToList(),
                 };
             }
 
@@ -103,6 +104,24 @@ namespace DMS.Infrastructure.Repositories
             await _context.SaveChangesAsync();
 
             return true;
+        }
+
+        public async Task<WorkspaceDto> GetWorkspaceByDirectoryIdAsync(int id)
+        {
+            var directory = await _context.Directories.Include(d => d.Workspace).FirstOrDefaultAsync(d => d.Id == id);
+
+            if (directory == null)
+            {
+                throw new Exception("Something went wrong");
+            }
+
+            var workspaceDto = new WorkspaceDto
+            {
+                Name = directory.Workspace.Name,
+                id = directory.Workspace.Id,
+            };
+
+            return workspaceDto;
         }
 
         //public async Task<ICollection<MyDirectory>> GetDirectoriesInWorkspace(int workspaceId)

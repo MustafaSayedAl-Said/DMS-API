@@ -1,5 +1,7 @@
 ﻿using DMS.API.Errors;
+using DMS.API.Helper;
 using DMS.Core.Dto;
+using DMS.Core.Sharing;
 using DMS.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -104,12 +106,12 @@ namespace DMS.API.Controllers
         }
         [Authorize(Roles = "Admin")]
         [HttpGet]
-        public async Task<IActionResult> GetAllUsers()
+        public async Task<IActionResult> GetAllUsers([FromQuery] UserParams userParams)
         {
             try
             {
-                var res = await _userService.GetAllUsersAsync();
-                return Ok(res);
+                var (users, totalItems) = await _userService.GetAllUsersAsync(userParams);
+                return Ok(new Pagination<UserGetDto>(totalItems, userParams.PageSize, userParams.PageNumber, users));
             }
             catch (Exception ex)
             {

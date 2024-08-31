@@ -1,4 +1,5 @@
 ﻿using DMS.Core.Dto;
+using DMS.Core.Sharing;
 using Microsoft.AspNetCore.Http;
 
 namespace DMS.Services.Interfaces
@@ -15,6 +16,6 @@ namespace DMS.Services.Interfaces
 
         public Task<WorkspaceDto> GetUserWorkspace(HttpContext httpContext);
 
-        public Task<List<UserGetDto>> GetAllUsersAsync();
+        public Task<(List<UserGetDto>, int)> GetAllUsersAsync(UserParams userParams);
     }
 }

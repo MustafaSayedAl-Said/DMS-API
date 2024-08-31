@@ -1,4 +1,5 @@
-﻿using DMS.Core.Entities;
+﻿using DMS.Core.Dto;
+using DMS.Core.Entities;
 using DMS.Core.Sharing;
 
 namespace DMS.Core.Interfaces
@@ -17,6 +18,7 @@ namespace DMS.Core.Interfaces
 
         public Task<bool> UpdateDirectoryNameAsync(string newName, int directoryId);
 
+        public Task<WorkspaceDto> GetWorkspaceByDirectoryIdAsync(int id);
         //public Task<ICollection<MyDirectory>> GetDirectoriesInWorkspace(int workspaceId);
     }
 }

@@ -10,6 +10,8 @@
 
         public int Id { get; set; }
 
+        public bool isAdmin { get; set; } = false;
+
     }
 
     public class UserGetDto

@@ -188,5 +188,21 @@ namespace DMS.API.Controllers
 
         }
 
+        [HttpGet("workspace/{id}")]
+        [Authorize(Roles ="Admin")]
+        public async Task<IActionResult> GetWorkspaceByDirectoryId(int id)
+        {
+            try
+            {
+                var workspaceDto = await _directoryService.GetWorkspaceByDirectoryId(id);
+
+                return Ok(workspaceDto);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
     }
 }

@@ -112,5 +112,15 @@ namespace DMS.Services.Services
             return await GetAllDirectoriesAsync(directoryParams);
 
         }
+
+        public async Task<WorkspaceDto> GetWorkspaceByDirectoryId(int id)
+        {
+            if (!_uOW.directoryRepository.directoryExists(id))
+            {
+                throw new Exception("Directory doesn't exist");
+            }
+
+            return await _uOW.directoryRepository.GetWorkspaceByDirectoryIdAsync(id);
+        }
     }
 }
