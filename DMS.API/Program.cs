@@ -47,8 +47,6 @@ app.UseMiddleware<ExceptionMiddleware>();
 app.UseStatusCodePagesWithReExecute("/errors/{0}");
 
 app.UseHttpsRedirection();
-app.UseStaticFiles();
-
 
 // Enable CORS for the specified policy
 app.UseCors("AllowAngularApp");

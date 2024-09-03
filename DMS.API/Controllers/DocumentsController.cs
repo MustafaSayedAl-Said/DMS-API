@@ -2,6 +2,7 @@
 using DMS.Core.Dto;
 using DMS.Core.Sharing;
 using DMS.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.StaticFiles;
 using System.Security.Claims;
@@ -242,7 +243,7 @@ namespace DMS.API.Controllers
                         }
                     }
                 }
-                var path = documentDto.DocumentContent;
+                var path = "wwwroot" + documentDto.DocumentContent;
 
 
                 var net = new System.Net.WebClient();
@@ -258,5 +259,48 @@ namespace DMS.API.Controllers
                 return BadRequest($"Error downloading file: {ex.Message}");
             }
         }
+
+        [HttpGet("preview/{id}")]
+        public async Task<IActionResult> PreviewFile(int id)
+        {
+            try
+            {
+                var userId = HttpContext.User?.Claims?.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier)?.Value;
+                var email = HttpContext.User?.Claims?.FirstOrDefault(x => x.Type == ClaimTypes.Email)?.Value;
+                var documentDto = await _documentService.GetDocumentByIdAsync(id);
+                var isAdmin = HttpContext.User.IsInRole("Admin");
+
+                if (!documentDto.IsPublic)
+                {
+                    if (!isAdmin)
+                    {
+                        if (documentDto == null || (documentDto.OwnerName != email))
+                        {
+                            return Forbid("You don't have access to this file.");
+                        }
+                    }
+                }
+
+                var path = "wwwroot" + documentDto.DocumentContent;
+                if (!System.IO.File.Exists(path))
+                {
+                    return NotFound("File not found");
+                }
+
+                var provider = new FileExtensionContentTypeProvider();
+                if (!provider.TryGetContentType(path, out var contentType))
+                {
+                    contentType = "application/octet-stream"; // Default to binary stream if unknown
+                }
+
+                var fileStream = new FileStream(path, FileMode.Open, FileAccess.Read);
+                return File(fileStream, contentType);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Error previewing file: {ex.Message}");
+            }
+        }
+
     }
 }
