@@ -58,7 +58,7 @@ namespace DMS.Infrastructure.Repositories
             List<Document> query;
 
             //search by directoryId
-            query = await _context.Documents.AsNoTracking().Where(d => d.DirectoryId == documentParams.DirectoryId && d.IsDeleted == false).AsNoTracking().ToListAsync();
+            query = await _context.Documents.AsNoTracking().Where(d => d.DirectoryId == documentParams.DirectoryId && d.IsDeleted == false).ToListAsync();
             //if (documentParams.DirectoryId.HasValue)
             //{
 
@@ -176,7 +176,7 @@ namespace DMS.Infrastructure.Repositories
             List<Document> query;
 
             // Get all that have isPublic condition set to 1
-            query = await _context.Documents.AsNoTracking().Where(d => d.IsPublic == true && d.IsDeleted == false).AsNoTracking().ToListAsync();
+            query = await _context.Documents.AsNoTracking().Where(d => d.IsPublic == true && d.IsDeleted == false).ToListAsync();
 
             //search by name
             if (!string.IsNullOrEmpty(documentParams.Search))
