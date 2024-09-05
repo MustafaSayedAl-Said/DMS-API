@@ -58,7 +58,7 @@ namespace DMS.API.Controllers
         }
 
         [HttpPost]
-
+        [Authorize]
         public async Task<ActionResult> Post(MyDirectoryDto directoryDto)
         {
             try
@@ -66,11 +66,6 @@ namespace DMS.API.Controllers
                 if (ModelState.IsValid)
                 {
                     var userId = HttpContext.User?.Claims?.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier)?.Value;
-
-                    if (string.IsNullOrEmpty(userId))
-                    {
-                        return Unauthorized("User is not authenticated");
-                    }
 
                     // Check if the user has the "Admin" role from the token
                     var isAdmin = HttpContext.User.IsInRole("Admin");
@@ -101,17 +96,12 @@ namespace DMS.API.Controllers
 
 
         [HttpDelete("{id}")]
-
+        [Authorize]
         public async Task<ActionResult> Delete(int id)
         {
             try
             {
                 var userId = HttpContext.User?.Claims?.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier).Value;
-
-                if (string.IsNullOrEmpty(userId))
-                {
-                    return Unauthorized("User is not authenticated");
-                }
 
                 // Check if the user has the "Admin" role from the token
                 var isAdmin = HttpContext.User.IsInRole("Admin");
@@ -141,6 +131,7 @@ namespace DMS.API.Controllers
         }
 
         [HttpPatch("{id}")]
+        [Authorize]
         public async Task<ActionResult> Patch(int id, [FromBody] string newName)
         {
             if (string.IsNullOrEmpty(newName))
@@ -150,11 +141,6 @@ namespace DMS.API.Controllers
             try
             {
                 var userId = HttpContext.User?.Claims?.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier)?.Value;
-
-                if (string.IsNullOrEmpty(userId))
-                {
-                    return Unauthorized("User is not authenticated or user ID is invalid");
-                }
 
                 // Check if the user has the "Admin" role from the token
                 var isAdmin = HttpContext.User.IsInRole("Admin");
@@ -183,17 +169,12 @@ namespace DMS.API.Controllers
         }
 
         [HttpGet("user")]
-
+        [Authorize]
         public async Task<IActionResult> GetWithoutWorkspaceId([FromQuery] DirectoryParams directoryParams)
         {
             try
             {
                 var userId = HttpContext.User?.Claims?.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier)?.Value;
-                if (string.IsNullOrEmpty(userId))
-                {
-                    return Unauthorized("User is not authenticated");
-                }
-
                 var (directories, totalItems) = await _directoryService.GetAllDirectoriesByUserIdAsync(int.Parse(userId), directoryParams);
                 return Ok(new Pagination<MyDirectoryDto>(totalItems, directoryParams.PageSize, directoryParams.PageNumber, directories));
             }

@@ -21,16 +21,12 @@ namespace DMS.API.Controllers
         }
 
         [HttpGet]
-
+        [Authorize]
         public async Task<IActionResult> Get([FromQuery] DocumentParams documentParams)
         {
             try
             {
                 var userId = HttpContext.User?.Claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier)?.Value;
-                if (string.IsNullOrEmpty(userId))
-                {
-                    return Unauthorized("User is not authenticated");
-                }
 
                 // Check if the user has the "Admin" role from the token
                 var isAdmin = HttpContext.User.IsInRole("Admin");
@@ -91,7 +87,7 @@ namespace DMS.API.Controllers
         }
 
         [HttpPost]
-
+        [Authorize]
         public async Task<ActionResult> Post([FromForm] DocumentDto documentDto)
         {
             try
@@ -100,11 +96,6 @@ namespace DMS.API.Controllers
                 {
                     var userId = HttpContext.User?.Claims?.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier)?.Value;
                     var email = HttpContext.User?.Claims?.FirstOrDefault(x => x.Type == ClaimTypes.Email).Value;
-
-                    if (string.IsNullOrEmpty(userId))
-                    {
-                        return Unauthorized("User is not authenticated");
-                    }
 
                     // Check if the user has the "Admin" role from the token
                     var isAdmin = HttpContext.User.IsInRole("Admin");
@@ -133,6 +124,7 @@ namespace DMS.API.Controllers
 
 
         [HttpDelete("{id}")]
+        [Authorize]
 
         public async Task<ActionResult> Delete(int id)
         {
@@ -140,11 +132,6 @@ namespace DMS.API.Controllers
             {
                 var userId = HttpContext.User?.Claims?.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier).Value;
                 var email = HttpContext.User?.Claims?.FirstOrDefault(x => x.Type == ClaimTypes.Email).Value;
-
-                if (string.IsNullOrEmpty(userId))
-                {
-                    return Unauthorized("User is not authenticated");
-                }
 
                 // Check if the user has the "Admin" role from the token
                 var isAdmin = HttpContext.User.IsInRole("Admin");
@@ -172,6 +159,7 @@ namespace DMS.API.Controllers
         }
 
         [HttpPatch("{id}")]
+        [Authorize]
 
         public async Task<ActionResult> Patch(int id)
         {
@@ -179,11 +167,6 @@ namespace DMS.API.Controllers
             {
                 var userId = HttpContext.User?.Claims?.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier)?.Value;
                 var email = HttpContext.User?.Claims?.FirstOrDefault(x => x.Type == ClaimTypes.Email)?.Value;
-
-                if (string.IsNullOrEmpty(userId))
-                {
-                    return Unauthorized("User is not authenticated or user ID is invalid");
-                }
 
                 // Check if the user has the "Admin" role from the token
                 var isAdmin = HttpContext.User.IsInRole("Admin");
@@ -230,6 +213,11 @@ namespace DMS.API.Controllers
                 {
                     var userId = HttpContext.User?.Claims?.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier)?.Value;
                     var email = HttpContext.User?.Claims?.FirstOrDefault(x => x.Type == ClaimTypes.Email)?.Value;
+                    if (string.IsNullOrEmpty(userId))
+                    {
+                        return Unauthorized("User is not authenticated or user ID is invalid");
+                    }
+
                     // Check if the user has the "Admin" role from the token
                     var isAdmin = HttpContext.User.IsInRole("Admin");
 
@@ -272,6 +260,12 @@ namespace DMS.API.Controllers
 
                 if (!documentDto.IsPublic)
                 {
+
+                    if (string.IsNullOrEmpty(userId))
+                    {
+                        return Unauthorized("User is not authenticated or user ID is invalid");
+                    }
+
                     if (!isAdmin)
                     {
                         if (documentDto == null || (documentDto.OwnerName != email))
