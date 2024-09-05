@@ -1,5 +1,6 @@
 ﻿using DMS.API.Errors;
 using DMS.Services.Interfaces;
+using DMS.Services.Repositories;
 using DMS.Services.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.FileProviders;
@@ -12,6 +13,8 @@ namespace DMS.API.Extensions
         {
 
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+            //configure token services
+            services.AddScoped<ITokenService, TokenService>();
             services.AddScoped<IDocumentService, DocumentService>();
             services.AddScoped<IDirectoryService, DirectoryService>();
             services.AddScoped<IWorkspaceService, WorkspaceService>();

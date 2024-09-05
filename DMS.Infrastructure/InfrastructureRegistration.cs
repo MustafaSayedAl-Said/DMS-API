@@ -18,8 +18,6 @@ namespace DMS.Infrastructure
     {
         public static IServiceCollection InfrastructureConfiguration(this IServiceCollection services, IConfiguration configuration)
         {
-            //configure token services
-            services.AddScoped<ITokenService, TokenService>();
             services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
             /*services.AddScoped<IWorkspaceRepository, WorkspaceRepository>();
             services.AddScoped<IDirectoryRepository, DirectoryRepository>();

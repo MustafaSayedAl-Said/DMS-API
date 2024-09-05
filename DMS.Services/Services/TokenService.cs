@@ -1,5 +1,5 @@
 ﻿using DMS.Core.Entities;
-using DMS.Core.Interfaces;
+using DMS.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
@@ -7,7 +7,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
-namespace DMS.Infrastructure.Repositories
+namespace DMS.Services.Repositories
 {
     public class TokenService : ITokenService
     {

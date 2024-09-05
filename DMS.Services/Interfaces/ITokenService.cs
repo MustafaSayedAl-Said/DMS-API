@@ -1,6 +1,6 @@
 ﻿using DMS.Core.Entities;
 
-namespace DMS.Core.Interfaces
+namespace DMS.Services.Interfaces
 {
     public interface ITokenService
     {

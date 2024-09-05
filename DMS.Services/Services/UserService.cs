@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using DMS.Core.Dto;
 using DMS.Core.Entities;
-using DMS.Core.Interfaces;
 using DMS.Core.Sharing;
 using DMS.Services.Extensions;
 using DMS.Services.Interfaces;
