@@ -18,6 +18,9 @@ namespace DMS.Infrastructure.Data
 
         public virtual DbSet<Workspace> Workspaces { get; set; }
 
+        public virtual DbSet<ActionLog> ActionLogs { get; set; }
+
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -39,6 +42,19 @@ namespace DMS.Infrastructure.Data
             .HasOne(d => d.MyDirectory)
             .WithMany(dir => dir.Documents)
             .HasForeignKey(d => d.DirectoryId);
+
+            // ActionLogs configuration
+            modelBuilder.Entity<ActionLog>()
+                .HasOne(al => al.User)
+                .WithMany()
+                .HasForeignKey(al => al.UserId)
+                .OnDelete(DeleteBehavior.Restrict);  // Prevent cascading delete on UserId
+
+            modelBuilder.Entity<ActionLog>()
+                .HasOne(al => al.Document)
+                .WithMany()
+                .HasForeignKey(al => al.DocumentId)
+                .OnDelete(DeleteBehavior.SetNull);
 
         }
     }

@@ -1,14 +1,29 @@
 using DMS.API.Extensions;
+using DMS.API.Hubs;
 using DMS.API.Middleware;
+using DMS.API.Service;
 using DMS.Infrastructure;
 using Microsoft.OpenApi.Models;
+using RabbitMQ.Client;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Services.AddSignalR(hubOptions => { hubOptions.EnableDetailedErrors = true; });
 builder.Services.AddControllers();
 builder.Services.AddApiRegistration();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+
+builder.Services.AddHostedService<LogConsumerService>();
+
+builder.Services.AddSingleton(
+           new ConnectionFactory
+           {
+               HostName = "localhost",
+               UserName = "user",
+               Password = "mypass",
+               VirtualHost = "/"
+           });
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(s =>
@@ -37,13 +52,16 @@ builder.Services.InfrastructureConfiguration(builder.Configuration);
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+app.UseRouting();
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 app.UseMiddleware<ExceptionMiddleware>();
+
+
 app.UseStatusCodePagesWithReExecute("/errors/{0}");
 
 app.UseHttpsRedirection();
@@ -54,6 +72,14 @@ app.UseCors("AllowAngularApp");
 app.UseAuthentication();
 
 app.UseAuthorization();
+
+app.UseMiddleware<ActionLoggingMiddleware>();
+
+//app.MapHub<NotificationHub>("/notificationHub");
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapHub<NotificationHub>("/notificationHub");
+});
 
 app.MapControllers();
 

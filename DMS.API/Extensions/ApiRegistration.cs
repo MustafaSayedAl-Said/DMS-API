@@ -1,4 +1,5 @@
-﻿using DMS.API.Errors;
+﻿using CodeChamp.RabbitMQ;
+using DMS.API.Errors;
 using DMS.Services.Interfaces;
 using DMS.Services.Repositories;
 using DMS.Services.Services;
@@ -14,6 +15,8 @@ namespace DMS.API.Extensions
 
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             //configure token services
+            services.AddSingleton<IRabbitMQService, RabbitMQService>();
+            services.AddSingleton<MqConsumer>();
             services.AddScoped<ITokenService, TokenService>();
             services.AddScoped<IDocumentService, DocumentService>();
             services.AddScoped<IDirectoryService, DirectoryService>();

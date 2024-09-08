@@ -186,7 +186,7 @@ namespace DMS.API.Controllers
         }
 
         [HttpGet("workspace/{id}")]
-        [Authorize(Roles ="Admin")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetWorkspaceByDirectoryId(int id)
         {
             try

@@ -11,7 +11,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DMS.API", "DMS.API\DMS.API.
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{D72B19D8-ED61-447A-9022-28E1E8EE0189}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DMS.Services", "DMS.Services\DMS.Services.csproj", "{B96F532C-CE54-4E92-8B1D-A9F2FB1D6B8E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DMS.Services", "DMS.Services\DMS.Services.csproj", "{B96F532C-CE54-4E92-8B1D-A9F2FB1D6B8E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

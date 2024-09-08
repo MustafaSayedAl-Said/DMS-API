@@ -53,8 +53,26 @@ namespace DMS.Infrastructure
                         ValidateLifetime = true,
                         ValidateAudience = true,
                     };
-                });
+                    // Enable SignalR to receive the access token via the query string
+                    opt.Events = new JwtBearerEvents
+                    {
+                        OnMessageReceived = context =>
+                        {
+                            // Look for the token in the query string when SignalR sends it
+                            var accessToken = context.Request.Query["access_token"];
 
+                            // If a token is found, read it and set the token to the context
+                            if (!string.IsNullOrEmpty(accessToken))
+                            {
+                                context.Token = accessToken;
+                            }
+
+                            return Task.CompletedTask;
+                        }
+                    };
+
+                });
+       
             return services;
         }
 

@@ -156,7 +156,7 @@ namespace DMS.Services.Services
             if (users == null || users.Count == 0)
                 throw new Exception("Users not found");
 
-            if(!string.IsNullOrEmpty(userParams.Search))
+            if (!string.IsNullOrEmpty(userParams.Search))
                 users = users.Where(x => x.Email!.ToLower().Contains(userParams.Search.ToLower())).ToList();
 
             int totalCount = users.Count();
@@ -189,14 +189,22 @@ namespace DMS.Services.Services
 
             user.isLocked = !user.isLocked;
 
-            var res =  await _userManager.UpdateAsync(user);
+            var res = await _userManager.UpdateAsync(user);
 
-            if (res.Succeeded) { 
+            if (res.Succeeded)
+            {
                 return true;
             }
 
             return false;
 
+        }
+
+        public async Task<List<int>> GetAllAdminIDs()
+        {
+            var users = await _userManager.GetUsersInRoleAsync("Admin");
+
+            return users.Select(x => x.Id).ToList();
         }
     }
 }

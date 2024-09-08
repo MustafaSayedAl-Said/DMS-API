@@ -19,5 +19,7 @@ namespace DMS.Services.Interfaces
         public Task<(List<UserGetDto>, int)> GetAllUsersAsync(UserParams userParams, int currentUserId);
 
         public Task<bool> ToggleUserLock(int userId);
+
+        public Task<List<int>> GetAllAdminIDs();
     }
 }
