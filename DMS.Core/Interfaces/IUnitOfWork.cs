@@ -9,5 +9,7 @@
         public IUserRepository userRepository { get; }
 
         public IDocumentRepository documentRepository { get; }
+
+        public IActionLogRepository actionLogRepository { get; }
     }
 }

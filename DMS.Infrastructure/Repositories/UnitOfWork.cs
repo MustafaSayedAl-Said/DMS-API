@@ -18,6 +18,8 @@ namespace DMS.Infrastructure.Repositories
 
         public IDocumentRepository documentRepository { get; }
 
+        public IActionLogRepository actionLogRepository { get; }
+
         public UnitOfWork(DataContext context, IMapper mapper)
         {
             _context = context;
@@ -26,6 +28,7 @@ namespace DMS.Infrastructure.Repositories
             directoryRepository = new DirectoryRepository(_context);
             userRepository = new UserRepository(_context);
             documentRepository = new DocumentRepository(_context, _mapper);
+            actionLogRepository = new ActionLogRepository(_context);
         }
     }
 }

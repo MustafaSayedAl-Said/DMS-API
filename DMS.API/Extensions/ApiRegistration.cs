@@ -22,6 +22,7 @@ namespace DMS.API.Extensions
             services.AddScoped<IDirectoryService, DirectoryService>();
             services.AddScoped<IWorkspaceService, WorkspaceService>();
             services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IActionLogService, ActionLogService>();
             //Configure IFileProvider
             services.AddSingleton<IFileProvider>(new PhysicalFileProvider(
                 Path.Combine(Directory.GetCurrentDirectory(), "wwwroot")));

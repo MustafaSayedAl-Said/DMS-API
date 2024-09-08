@@ -1,4 +1,4 @@
-﻿namespace DMS.API.Helper
+﻿namespace DMS.API.Helpers
 {
     public class Pagination<T> where T : class
     {
