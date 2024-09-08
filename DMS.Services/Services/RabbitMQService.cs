@@ -8,7 +8,7 @@ namespace DMS.Services.Services
 {
     public class RabbitMQService : IRabbitMQService
     {
-        public void SendMessage(ActionLogEvent logEntry)
+        public void SendMessage(ActionLog logEntry)
         {
             var factory = new ConnectionFactory() { HostName = "localhost", UserName = "user", Password = "mypass", VirtualHost = "/" };
             using var connection = factory.CreateConnection();

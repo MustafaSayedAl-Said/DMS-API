@@ -40,8 +40,7 @@ namespace DMS.API.Service
             {
                 var body = args.Body.ToArray();
                 var postJson = Encoding.UTF8.GetString(body);
-                var actionLog = JsonSerializer.Deserialize<ActionLogEvent>(postJson);
-                await _hubContext.Clients.Group("Admins").SendAsync("ReceiveNotification", actionLog);
+                await _hubContext.Clients.Group("Admins").SendAsync("ReceiveNotification", postJson);
 
             });
            // channel.BasicConsume(queue: "actionLogsQueue", autoAck: true, consumer: _consumer);

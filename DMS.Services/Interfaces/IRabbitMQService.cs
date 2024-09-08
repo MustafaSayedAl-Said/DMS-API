@@ -4,6 +4,6 @@ namespace DMS.Services.Interfaces
 {
     public interface IRabbitMQService
     {
-        public void SendMessage(ActionLogEvent logEntry);
+        public void SendMessage(ActionLog logEntry);
     }
 }

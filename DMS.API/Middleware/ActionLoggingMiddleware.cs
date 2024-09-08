@@ -26,15 +26,15 @@ namespace DMS.API.Middleware
 
             if (actionType != null && userId != null)
             {
-                var logEntry = new ActionLogEvent
+                var logEntry = new ActionLog
                 {
                     UserId = int.Parse(userId),
-                    ActionTypeId = (int)actionType,
+                    ActionType = (ActionTypeEnum) actionType,
                     CreationDate = DateTime.UtcNow,
                     UserName = email,
                     DocumentId = GetDocumentIdFromRequest(context),
                     DocumentName = GetDocumentNameFromRequest(context),
-                    Reviewers = await userService.GetAllAdminIDs()
+                    //Reviewers = await userService.GetAllAdminIDs()
                 };
 
                 // Send log entry to RabbitMQ
