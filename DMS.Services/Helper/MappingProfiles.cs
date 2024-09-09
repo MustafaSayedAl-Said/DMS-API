@@ -22,6 +22,8 @@ namespace DMS.Services.Helper
             // Workspace Mappings
             CreateMap<Workspace, WorkspaceDto>().ReverseMap();
 
+            CreateMap<ActionLog, ActionLogsDto>().ReverseMap();
+
             CreateMap<User, UserGetDto>()
             .ForMember(dest => dest.WorkspaceName, opt => opt.MapFrom(src => src.Workspace.Name))
             .ForMember(dest => dest.WorkspaceId, opt => opt.MapFrom(src => src.Workspace.Id));

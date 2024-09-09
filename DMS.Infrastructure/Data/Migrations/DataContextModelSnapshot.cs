@@ -42,7 +42,7 @@ namespace DMS.Infrastructure.Data.Migrations
                     b.Property<string>("DocumentName")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("UserId")
+                    b.Property<int?>("UserId")
                         .HasColumnType("int");
 
                     b.Property<string>("UserName")
@@ -359,8 +359,7 @@ namespace DMS.Infrastructure.Data.Migrations
                     b.HasOne("DMS.Core.Entities.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Document");
 

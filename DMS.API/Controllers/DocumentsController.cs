@@ -1,5 +1,6 @@
 ﻿using DMS.API.Helpers;
 using DMS.Core.Dto;
+using DMS.Core.Entities;
 using DMS.Core.Sharing;
 using DMS.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -14,10 +15,14 @@ namespace DMS.API.Controllers
     public class DocumentsController : ControllerBase
     {
         private readonly IDocumentService _documentService;
+        private readonly IRabbitMQService _rabbitMQService;
+        private readonly IActionLogService _actionLogService;
 
-        public DocumentsController(IDocumentService documentService)
+        public DocumentsController(IDocumentService documentService, IRabbitMQService rabbitMQService, IActionLogService actionLogService)
         {
             _documentService = documentService;
+            _actionLogService = actionLogService;
+            _rabbitMQService = rabbitMQService;
         }
 
         [HttpGet]
@@ -86,6 +91,7 @@ namespace DMS.API.Controllers
             }
         }
 
+        // upload document
         [HttpPost]
         [Authorize]
         public async Task<ActionResult> Post([FromForm] DocumentDto documentDto)
@@ -110,7 +116,21 @@ namespace DMS.API.Controllers
                     }
                     var result = await _documentService.AddDocumentAsync(documentDto, email);
                     if (result)
+                    {
+                        // create a log
+                        var logEntry = new ActionLog
+                        {
+                            UserId = int.Parse(userId),
+                            UserName = email,
+                            ActionType = ActionTypeEnum.Upload,
+                            CreationDate = DateTime.Now,
+                            DocumentId = null,
+                            DocumentName = documentDto.DocumentContent.FileName,
+                        };
+                        _rabbitMQService.SendMessage(logEntry);
+                        await _actionLogService.AddActionLogAsync(logEntry);
                         return Ok(documentDto);
+                    }
                     return BadRequest("Error occurred while adding the document.");
                 }
 
@@ -196,12 +216,15 @@ namespace DMS.API.Controllers
             }
         }
 
+        // download document
         [HttpGet("download/{id}")]
 
         public async Task<IActionResult> DownloadFile(int id)
         {
             try
             {
+                var userId = HttpContext.User?.Claims?.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier)?.Value;
+                var email = HttpContext.User?.Claims?.FirstOrDefault(x => x.Type == ClaimTypes.Email)?.Value;
                 var documentDto = await _documentService.GetDocumentByIdAsync(id);
 
                 if (documentDto == null)
@@ -209,10 +232,9 @@ namespace DMS.API.Controllers
                     return NotFound("Document not found");
                 }
 
+                // Check if document is public or not
                 if (!documentDto.IsPublic)
                 {
-                    var userId = HttpContext.User?.Claims?.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier)?.Value;
-                    var email = HttpContext.User?.Claims?.FirstOrDefault(x => x.Type == ClaimTypes.Email)?.Value;
                     if (string.IsNullOrEmpty(userId))
                     {
                         return Unauthorized("User is not authenticated or user ID is invalid");
@@ -240,6 +262,21 @@ namespace DMS.API.Controllers
                 var contentType = "APPLICATION/octet-stream";
                 var fileName = documentDto.Name;
 
+
+                // create a log
+
+                var logEntry = new ActionLog
+                {
+                    UserId = string.IsNullOrEmpty(userId) ? null : int.Parse(userId),
+                    UserName = string.IsNullOrEmpty(email) ? "Public User" : email,
+                    ActionType = ActionTypeEnum.Download,
+                    CreationDate = DateTime.Now,
+                    DocumentId = id,
+                    DocumentName = documentDto.Name,
+                };
+                _rabbitMQService.SendMessage(logEntry);
+                await _actionLogService.AddActionLogAsync(logEntry);
+
                 return File(content, contentType, fileName);
             }
             catch (Exception ex)
@@ -247,6 +284,8 @@ namespace DMS.API.Controllers
                 return BadRequest($"Error downloading file: {ex.Message}");
             }
         }
+
+        //preview document
 
         [HttpGet("preview/{id}")]
         public async Task<IActionResult> PreviewFile(int id)
@@ -288,6 +327,19 @@ namespace DMS.API.Controllers
                 }
 
                 var fileStream = new FileStream(path, FileMode.Open, FileAccess.Read);
+
+                // create a log
+                var logEntry = new ActionLog
+                {
+                    UserId = string.IsNullOrEmpty(userId)? null:int.Parse(userId),
+                    UserName = string.IsNullOrEmpty(email)? "Public User":email,
+                    ActionType = ActionTypeEnum.Preview,
+                    CreationDate = DateTime.Now,
+                    DocumentId = id,
+                    DocumentName = documentDto.Name,
+                };
+                _rabbitMQService.SendMessage(logEntry);
+                await _actionLogService.AddActionLogAsync(logEntry);
                 return File(fileStream, contentType);
             }
             catch (Exception ex)

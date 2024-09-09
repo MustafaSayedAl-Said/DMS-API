@@ -21,6 +21,8 @@ namespace DMS.Services.Repositories
             _key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config[key: "Token:key"]));
             _userManager = userManager;
         }
+
+        // Create Token
         public async Task<string> CreateToken(User user)
         {
             var claims = new List<Claim>()

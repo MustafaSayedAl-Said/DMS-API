@@ -11,7 +11,7 @@ namespace DMS.Services.Services
         private readonly IUnitOfWork _uOW;
         private readonly IMapper _mapper;
 
-        public DocumentService(IUnitOfWork UOW, IMapper mapper)
+        public DocumentService(IUnitOfWork UOW, IMapper mapper, IRabbitMQService rabbitMQService)
         {
             _uOW = UOW;
             _mapper = mapper;

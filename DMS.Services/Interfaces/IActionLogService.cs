@@ -1,4 +1,5 @@
-﻿using DMS.Core.Entities;
+﻿using DMS.Core.Dto;
+using DMS.Core.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,6 +11,8 @@ namespace DMS.Services.Interfaces
     public interface IActionLogService
     {
 
-        public Task<IReadOnlyList<ActionLog>> GetAllActionLogs();
+        public Task<IReadOnlyList<ActionLogsDto>> GetAllActionLogs();
+
+        public Task<bool> AddActionLogAsync(ActionLog actionLog);
     }
 }

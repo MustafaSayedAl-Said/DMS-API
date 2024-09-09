@@ -4,7 +4,7 @@
     {
         public int Id { get; set; }
         public ActionTypeEnum ActionType { get; set; }
-        public int UserId { get; set; }
+        public int? UserId { get; set; }
 
         public int? DocumentId { get; set; }
 

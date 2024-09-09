@@ -73,8 +73,6 @@ app.UseAuthentication();
 
 app.UseAuthorization();
 
-app.UseMiddleware<ActionLoggingMiddleware>();
-
 //app.MapHub<NotificationHub>("/notificationHub");
 app.UseEndpoints(endpoints =>
 {
