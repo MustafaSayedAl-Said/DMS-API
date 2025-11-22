@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
+using Npgsql.EntityFrameworkCore.PostgreSQL;
 using System.Text;
 
 namespace DMS.Infrastructure
@@ -28,7 +29,7 @@ namespace DMS.Infrastructure
             //Configure DB
             services.AddDbContext<DataContext>(opt =>
             {
-                opt.UseSqlServer(configuration.GetConnectionString("DefaultConnection"));
+                opt.UseNpgsql(configuration.GetConnectionString("DefaultConnection"));
             });
 
             services.AddIdentity<User, IdentityRole<int>>()
@@ -82,8 +83,7 @@ namespace DMS.Infrastructure
             {
                 var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole<int>>>();
                 var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
-                await IdentitySeed.SeedUserAsync(userManager);
-                await IdentitySeed.SeedUserRolesAsync(roleManager);
+                await IdentitySeed.SeedUserAsync(userManager, roleManager);
             }
         }
     }

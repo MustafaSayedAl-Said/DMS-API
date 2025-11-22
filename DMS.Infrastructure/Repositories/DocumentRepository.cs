@@ -23,16 +23,14 @@ namespace DMS.Infrastructure.Repositories
         {
             if (dto.DocumentContent is not null)
             {
-                var root = "/documents/";
                 var documentName = $"{Guid.NewGuid()}{Path.GetExtension(dto.DocumentContent.FileName)}";
-                var directoryPath = Path.Combine("wwwroot", root.TrimStart('/'));
+                var directoryPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "documents");
 
                 if (!Directory.Exists(directoryPath))
                 {
                     Directory.CreateDirectory(directoryPath);
                 }
 
-                var src = Path.Combine(root, documentName);
                 var fullFilePath = Path.Combine(directoryPath, documentName);
 
                 using (var fileStream = new FileStream(fullFilePath, FileMode.Create))
@@ -40,12 +38,15 @@ namespace DMS.Infrastructure.Repositories
                     await dto.DocumentContent.CopyToAsync(fileStream);
                 }
 
+                // Store relative URL path in database (for serving via HTTP)
+                var relativePath = $"/documents/{documentName}";
+
                 // Map and save the document
                 var documentMap = _mapper.Map<Document>(dto);
                 documentMap.Name = dto.DocumentContent.FileName;
-                documentMap.DocumentContent = src; // Relative path, as stored in the database
+                documentMap.DocumentContent = relativePath; // Relative path, as stored in the database
                 documentMap.OwnerName = name;
-                documentMap.ModifyDate = DateTime.Now.Date;
+                documentMap.ModifyDate = DateTime.UtcNow; // Changed from DateTime.Now
                 await _context.Documents.AddAsync(documentMap);
                 await _context.SaveChangesAsync();
                 return true;

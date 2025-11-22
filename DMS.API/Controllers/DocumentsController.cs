@@ -17,12 +17,14 @@ namespace DMS.API.Controllers
         private readonly IDocumentService _documentService;
         private readonly IRabbitMQService _rabbitMQService;
         private readonly IActionLogService _actionLogService;
+        private readonly IWebHostEnvironment _env;
 
-        public DocumentsController(IDocumentService documentService, IRabbitMQService rabbitMQService, IActionLogService actionLogService)
+        public DocumentsController(IDocumentService documentService, IRabbitMQService rabbitMQService, IActionLogService actionLogService, IWebHostEnvironment env)
         {
             _documentService = documentService;
             _actionLogService = actionLogService;
             _rabbitMQService = rabbitMQService;
+            _env = env;
         }
 
         [HttpGet]
@@ -123,7 +125,7 @@ namespace DMS.API.Controllers
                             UserId = int.Parse(userId),
                             UserName = email,
                             ActionType = ActionTypeEnum.Upload,
-                            CreationDate = DateTime.Now,
+                            CreationDate = DateTime.UtcNow,
                             DocumentId = null,
                             DocumentName = documentDto.DocumentContent.FileName,
                         };
@@ -216,9 +218,7 @@ namespace DMS.API.Controllers
             }
         }
 
-        // download document
         [HttpGet("download/{id}")]
-
         public async Task<IActionResult> DownloadFile(int id)
         {
             try
@@ -240,7 +240,6 @@ namespace DMS.API.Controllers
                         return Unauthorized("User is not authenticated or user ID is invalid");
                     }
 
-                    // Check if the user has the "Admin" role from the token
                     var isAdmin = HttpContext.User.IsInRole("Admin");
 
                     if (!isAdmin)
@@ -253,39 +252,62 @@ namespace DMS.API.Controllers
                         }
                     }
                 }
-                var path = "wwwroot" + documentDto.DocumentContent;
 
+                // Get file path
+                var filePath = Path.Combine(_env.WebRootPath, documentDto.DocumentContent.TrimStart('/'));
 
-                var net = new System.Net.WebClient();
-                var data = net.DownloadData(path);
-                var content = new System.IO.MemoryStream(data);
-                var contentType = "APPLICATION/octet-stream";
+                if (!System.IO.File.Exists(filePath))
+                {
+                    Console.WriteLine($"File not found at: {filePath}");
+                    return NotFound("File not found on disk");
+                }
+
+                // Read file into memory
+                var memory = new MemoryStream();
+                using (var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
+                {
+                    await stream.CopyToAsync(memory);
+                }
+                memory.Position = 0;
+
+                var contentType = "application/octet-stream";
                 var fileName = documentDto.Name;
 
-
-                // create a log
-
-                var logEntry = new ActionLog
+                // Create and save log BEFORE returning the file
+                try
                 {
-                    UserId = string.IsNullOrEmpty(userId) ? null : int.Parse(userId),
-                    UserName = string.IsNullOrEmpty(email) ? "Public User" : email,
-                    ActionType = ActionTypeEnum.Download,
-                    CreationDate = DateTime.Now,
-                    DocumentId = id,
-                    DocumentName = documentDto.Name,
-                };
-                _rabbitMQService.SendMessage(logEntry);
-                await _actionLogService.AddActionLogAsync(logEntry);
+                    var logEntry = new ActionLog
+                    {
+                        UserId = string.IsNullOrEmpty(userId) ? null : int.Parse(userId),
+                        UserName = string.IsNullOrEmpty(email) ? "Public User" : email,
+                        ActionType = ActionTypeEnum.Download,
+                        CreationDate = DateTime.UtcNow,
+                        DocumentId = id,
+                        DocumentName = documentDto.Name,
+                    };
 
-                return File(content, contentType, fileName);
+                    // Send to RabbitMQ
+                    _rabbitMQService.SendMessage(logEntry);
+
+                    // Save to database
+                    await _actionLogService.AddActionLogAsync(logEntry);
+
+                    Console.WriteLine($"✔ Log created for download: Document ID {id} by {email ?? "Public User"}");
+                }
+                catch (Exception logEx)
+                {
+                    Console.WriteLine($"❌ Logging failed: {logEx.Message}");
+                    // Continue even if logging fails - don't block file download
+                }
+
+                return File(memory, contentType, fileName);
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"Error in DownloadFile: {ex}");
                 return BadRequest($"Error downloading file: {ex.Message}");
             }
         }
-
-        //preview document
 
         [HttpGet("preview/{id}")]
         public async Task<IActionResult> PreviewFile(int id)
@@ -295,11 +317,16 @@ namespace DMS.API.Controllers
                 var userId = HttpContext.User?.Claims?.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier)?.Value;
                 var email = HttpContext.User?.Claims?.FirstOrDefault(x => x.Type == ClaimTypes.Email)?.Value;
                 var documentDto = await _documentService.GetDocumentByIdAsync(id);
+
+                if (documentDto == null)
+                {
+                    return NotFound("Document not found");
+                }
+
                 var isAdmin = HttpContext.User.IsInRole("Admin");
 
                 if (!documentDto.IsPublic)
                 {
-
                     if (string.IsNullOrEmpty(userId))
                     {
                         return Unauthorized("User is not authenticated or user ID is invalid");
@@ -307,43 +334,69 @@ namespace DMS.API.Controllers
 
                     if (!isAdmin)
                     {
-                        if (documentDto == null || (documentDto.OwnerName != email))
+                        if (documentDto.OwnerName != email)
                         {
                             return Forbid("You don't have access to this file.");
                         }
                     }
                 }
 
-                var path = "wwwroot" + documentDto.DocumentContent;
-                if (!System.IO.File.Exists(path))
+                // Get file path
+                var filePath = Path.Combine(_env.WebRootPath, documentDto.DocumentContent.TrimStart('/'));
+
+                if (!System.IO.File.Exists(filePath))
                 {
-                    return NotFound("File not found");
+                    Console.WriteLine($"File not found at: {filePath}");
+                    return NotFound("File not found on disk");
                 }
 
+                // Get content type
                 var provider = new FileExtensionContentTypeProvider();
-                if (!provider.TryGetContentType(path, out var contentType))
+                if (!provider.TryGetContentType(filePath, out var contentType))
                 {
-                    contentType = "application/octet-stream"; // Default to binary stream if unknown
+                    contentType = "application/octet-stream";
                 }
 
-                var fileStream = new FileStream(path, FileMode.Open, FileAccess.Read);
-
-                // create a log
-                var logEntry = new ActionLog
+                // Read file into memory
+                var memory = new MemoryStream();
+                using (var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
                 {
-                    UserId = string.IsNullOrEmpty(userId)? null:int.Parse(userId),
-                    UserName = string.IsNullOrEmpty(email)? "Public User":email,
-                    ActionType = ActionTypeEnum.Preview,
-                    CreationDate = DateTime.Now,
-                    DocumentId = id,
-                    DocumentName = documentDto.Name,
-                };
-                _rabbitMQService.SendMessage(logEntry);
-                await _actionLogService.AddActionLogAsync(logEntry);
-                return File(fileStream, contentType);
+                    await fileStream.CopyToAsync(memory);
+                }
+                memory.Position = 0;
+
+                // Create and save log BEFORE returning the file
+                try
+                {
+                    var logEntry = new ActionLog
+                    {
+                        UserId = string.IsNullOrEmpty(userId) ? null : int.Parse(userId),
+                        UserName = string.IsNullOrEmpty(email) ? "Public User" : email,
+                        ActionType = ActionTypeEnum.Preview,
+                        CreationDate = DateTime.UtcNow,
+                        DocumentId = id,
+                        DocumentName = documentDto.Name,
+                    };
+
+                    // Send to RabbitMQ
+                    _rabbitMQService.SendMessage(logEntry);
+
+                    // Save to database
+                    await _actionLogService.AddActionLogAsync(logEntry);
+
+                    Console.WriteLine($"✔ Log created for preview: Document ID {id} by {email ?? "Public User"}");
+                }
+                catch (Exception logEx)
+                {
+                    Console.WriteLine($"❌ Logging failed: {logEx.Message}");
+                    // Continue even if logging fails - don't block file download
+                }
+
+                return File(memory, contentType, enableRangeProcessing: true);
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"Error in PreviewFile: {ex}");
                 return BadRequest($"Error previewing file: {ex.Message}");
             }
         }

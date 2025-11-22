@@ -1,30 +1,44 @@
-using DMS.API.Extensions;
+﻿using DMS.API.Extensions;
 using DMS.API.Hubs;
 using DMS.API.Middleware;
 using DMS.API.Service;
 using DMS.Infrastructure;
+using DMS.Infrastructure.Data;
+using DMS.Infrastructure.Data.Config; // Add this for IdentitySeed
+using DMS.Core.Entities; // Add this for User
+using Microsoft.AspNetCore.Identity; // Add this
+using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using RabbitMQ.Client;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-builder.Services.AddSignalR(hubOptions => { hubOptions.EnableDetailedErrors = true; });
-builder.Services.AddControllers();
-builder.Services.AddApiRegistration();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+// SignalR
+builder.Services.AddSignalR(o => o.EnableDetailedErrors = true);
 
+// Controllers
+builder.Services.AddControllers();
+
+// Register custom services
+builder.Services.AddApiRegistration();
+
+// RabbitMQ connection factory using config (NOT localhost)
+builder.Services.AddSingleton(
+    new ConnectionFactory
+    {
+        HostName = builder.Configuration["RabbitMQ:Host"],
+        UserName = builder.Configuration["RabbitMQ:Username"],
+        Password = builder.Configuration["RabbitMQ:Password"],
+        VirtualHost = builder.Configuration["RabbitMQ:VHost"]
+    });
+
+// Background consumer service
 builder.Services.AddHostedService<LogConsumerService>();
 
-builder.Services.AddSingleton(
-           new ConnectionFactory
-           {
-               HostName = "localhost",
-               UserName = "user",
-               Password = "mypass",
-               VirtualHost = "/"
-           });
+// EF Core + MySQL
+builder.Services.InfrastructureConfiguration(builder.Configuration);
 
+// Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(s =>
 {
@@ -45,35 +59,90 @@ builder.Services.AddSwaggerGen(s =>
     var securityRequirement = new OpenApiSecurityRequirement { { securitySchema, new[] { "bearer" } } };
     s.AddSecurityRequirement(securityRequirement);
 });
-builder.Services.InfrastructureConfiguration(builder.Configuration);
 
-
-
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAngularApp", policy =>
+    {
+        policy.WithOrigins(
+            "http://localhost:4200",           // Local Angular dev
+            "http://localhost:4201",           // In case you use different port
+            "http://frontend",                 // Docker frontend
+            "http://frontend:80",              // Docker frontend with port
+            "http://localhost:52987/"
+        )
+        .AllowAnyMethod()
+        .AllowAnyHeader()
+        .AllowCredentials();                   // Important for SignalR
+    });
+});
 
 var app = builder.Build();
 
+// Auto-create database and run migrations + SEED DATA
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    var db = services.GetRequiredService<DataContext>();
+
+    try
+    {
+        // Apply migrations
+        db.Database.Migrate();
+        Console.WriteLine("✔ Database migrations applied.");
+
+        // Seed roles and users
+        var userManager = services.GetRequiredService<UserManager<User>>();
+        var roleManager = services.GetRequiredService<RoleManager<IdentityRole<int>>>();
+
+        await IdentitySeed.SeedUserAsync(userManager, roleManager);
+        Console.WriteLine("✔ Identity seed completed.");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"❌ Database setup failed: {ex.Message}");
+        throw;
+    }
+}
+
+// Run migrations if --migrate is passed
+if (args.Contains("--migrate"))
+{
+    using var scope = app.Services.CreateScope();
+    var db = scope.ServiceProvider.GetRequiredService<DataContext>();
+    db.Database.Migrate();
+    Console.WriteLine("✔ EF Core migrations applied.");
+    return;
+}
+
 app.UseRouting();
 
+
+// Add static files middleware BEFORE CORS
+app.UseStaticFiles(); // Add this line
+
+// Swagger only in dev
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+// Custom exception middleware
 app.UseMiddleware<ExceptionMiddleware>();
-
-
 app.UseStatusCodePagesWithReExecute("/errors/{0}");
 
-app.UseHttpsRedirection();
+// DO NOT USE HTTPS REDIRECTION INSIDE A DOCKER CONTAINER (unless using proxy)
+// app.UseHttpsRedirection();
 
-// Enable CORS for the specified policy
+// CORS
 app.UseCors("AllowAngularApp");
 
+// Auth middleware
 app.UseAuthentication();
-
 app.UseAuthorization();
 
-//app.MapHub<NotificationHub>("/notificationHub");
+// SignalR
 app.UseEndpoints(endpoints =>
 {
     endpoints.MapHub<NotificationHub>("/notificationHub");
@@ -81,6 +150,7 @@ app.UseEndpoints(endpoints =>
 
 app.MapControllers();
 
+// Infrastructure middleware
 InfrastructureRegistration.InfrastructureConfigMiddleWare(app);
 
 await app.RunAsync();
