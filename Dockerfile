@@ -4,6 +4,11 @@ WORKDIR /app
 EXPOSE 8080
 EXPOSE 8081
 
+# ====== Base image ======
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
+WORKDIR /app
+
+
 # ====== Build image ======
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
@@ -30,5 +35,8 @@ WORKDIR /app
 COPY --from=publish /app/publish .
 
 RUN mkdir -p /app/wwwroot/documents
+
+# Railway provides PORT env variable
+ENV ASPNETCORE_URLS=http://0.0.0.0:${PORT:-8080}
 
 ENTRYPOINT ["dotnet", "DMS.API.dll"]

@@ -13,6 +13,13 @@ using RabbitMQ.Client;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Railway provides PORT environment variable
+var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
+builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
+
+// Enable legacy timestamp behavior for PostgreSQL
+AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+
 // SignalR
 builder.Services.AddSignalR(o => o.EnableDetailedErrors = true);
 
@@ -64,16 +71,9 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAngularApp", policy =>
     {
-        policy.WithOrigins(
-            "http://localhost:4200",           // Local Angular dev
-            "http://localhost:4201",           // In case you use different port
-            "http://frontend",                 // Docker frontend
-            "http://frontend:80",              // Docker frontend with port
-            "http://localhost:52987/"
-        )
-        .AllowAnyMethod()
-        .AllowAnyHeader()
-        .AllowCredentials();                   // Important for SignalR
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
     });
 });
 
